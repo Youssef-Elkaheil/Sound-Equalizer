@@ -267,12 +267,12 @@ class Ui_MainWindow(object):
         self.toolBar.addAction(self.actionEqualizer)
         self.toolBar.addAction(self.actionSpectrogram)
                                                                         #Methods
+        getFile = Data.getFile
         retranslateUi = RetranslateUI.retranslateUi
-
+        retranslateUi(self, MainWindow)
         #self.tabWidget.setCurrentIndex(0)
         #QtCore.QMetaObject.connectSlotsByName(MainWindow)
-
-        retranslateUi(self, MainWindow)
+        self.actionOpen.triggered.connect(lambda checked: getFile(self))
 
    
 
