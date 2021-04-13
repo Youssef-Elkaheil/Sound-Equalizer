@@ -16,8 +16,8 @@ def generatingSignal():
         comptype = "NONE"
         compname = "not compressed"
         sine_list = []
-        freq = 100
-        itr = 10000
+        freq = 0
+        itr = 0
         for x in range(data_size):
             if x > itr:
                 itr += 100
