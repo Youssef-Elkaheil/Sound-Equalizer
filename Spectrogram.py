@@ -27,8 +27,8 @@ def ShowSpectrogram(self,MainWindow):
 
 def Spectrogram(self, data):
     sampling_freq = 10e2*3
-    filtered_data = data[1000:]
-    freq, time, spectrogramPlot = signal.spectrogram(filtered_data, sampling_freq)
+    
+    freq, time, spectrogramPlot = signal.spectrogram(data, sampling_freq)
     self.hist_Before.setLevels(np.min(spectrogramPlot),
                          np.max(spectrogramPlot))
     self.img_Before.setImage(spectrogramPlot)
