@@ -15,12 +15,19 @@ def getFile(self):
 
 def plotData(self, fileName):
 
-    data, self.sampling_rate = librosa.load(
+    self.data, self.sampling_rate = librosa.load(
         fileName, sr=None, mono=True, offset=0.0, duration=None)
-    self.After.clear()
-    self.After.setTitle(fileName, color='w', size='12pt')
-    self.After.setLabel("left", "Amplitude")
-    self.After.setLabel("bottom", "Time")
-    self.After.plot(data)
-    print(data)
+    self.Graph_After.clear()
+    self.Graph_After.setTitle(fileName, color='w', size='12pt')
+    self.Graph_After.setLabel("left", "Amplitude")
+    self.Graph_After.setLabel("bottom", "Time")
+    self.Graph_After.plot(self.data)
+
+    self.Graph_Before.clear()
+    self.Graph_Before.setTitle(fileName, color='w', size='12pt')
+    self.Graph_Before.setLabel("left", "Amplitude")
+    self.Graph_Before.setLabel("bottom", "Time")
+    self.Graph_Before.plot(self.data)
+    print(self.data)
+    print(len(self.data))
 

@@ -1,13 +1,15 @@
 from PyQt5 import QtCore, QtGui, QtWidgets
 from pyqtgraph import PlotWidget
 import RetranslateUI
+import Spectrogram
+import Navigations
 import Resources
+import Equalizer
 import Data
-
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
-        MainWindow.resize(1537, 953)
+        MainWindow.setGeometry(QtCore.QRect(0, 0, 1110, 450))
         font = QtGui.QFont()
         font.setFamily("Source Sans Pro Black")
         font.setPointSize(10)
@@ -25,7 +27,7 @@ class Ui_MainWindow(object):
         self.centralwidget = QtWidgets.QWidget(MainWindow)
         self.centralwidget.setObjectName("centralwidget")
         self.tabWidget = QtWidgets.QTabWidget(self.centralwidget)
-        self.tabWidget.setGeometry(QtCore.QRect(20, 0, 1501, 861))
+        self.tabWidget.setGeometry(QtCore.QRect(20, 0, 1070, 350))
         sizePolicy = QtWidgets.QSizePolicy(
             QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Fixed)
         sizePolicy.setHorizontalStretch(0)
@@ -45,22 +47,22 @@ class Ui_MainWindow(object):
         self.tabWidget.setObjectName("tabWidget")
         self.tab = QtWidgets.QWidget()
         self.tab.setObjectName("tab")
-        self.Before = PlotWidget(self.tab)
-        self.Before.setGeometry(QtCore.QRect(50, 550, 961, 271))
-        self.Before.setObjectName("Before")
-        self.Before.setTitle("Before")
+        self.Graph_Before = PlotWidget(self.tab)
+        self.Graph_Before.setGeometry(QtCore.QRect(50, 550, 0 , 0))
+        self.Graph_Before.setObjectName("Graph_Before")
+        self.Graph_Before.setTitle("Before")
         self.Spectrogram_Before = PlotWidget(self.tab)
-        self.Spectrogram_Before.setGeometry(QtCore.QRect(1050, 520, 431, 300))
+        self.Spectrogram_Before.setGeometry(QtCore.QRect(1050, 520, 0, 0))
         self.Spectrogram_Before.setObjectName("Spectrogram_Before")
-        self.Spectrograph_After = PlotWidget(self.tab)
-        self.Spectrograph_After.setGeometry(QtCore.QRect(1050, 10, 431, 300))
-        self.Spectrograph_After.setObjectName("Spectrograph_After")
-        self.After = PlotWidget(self.tab)
-        self.After.setGeometry(QtCore.QRect(50, 10, 961, 271))
-        self.After.setObjectName("After")
-        self.After.setTitle("After")
+        self.Spectrogram_After = PlotWidget(self.tab)
+        self.Spectrogram_After.setGeometry(QtCore.QRect(1050, 10, 0, 0))
+        self.Spectrogram_After.setObjectName("Spectrogram_After")
+        self.Graph_After = PlotWidget(self.tab)
+        self.Graph_After.setGeometry(QtCore.QRect(50, 10, 961, 271))
+        self.Graph_After.setObjectName("Graph_After")
+        self.Graph_After.setTitle("After")
         self.frame = QtWidgets.QFrame(self.tab)
-        self.frame.setGeometry(QtCore.QRect(50, 310, 961, 211))
+        self.frame.setGeometry(QtCore.QRect(50, 310, 0, 0))
         self.frame.setLayoutDirection(QtCore.Qt.LeftToRight)
         self.frame.setAutoFillBackground(True)
         self.frame.setFrameShape(QtWidgets.QFrame.WinPanel)
@@ -266,13 +268,27 @@ class Ui_MainWindow(object):
         self.toolBar.addSeparator()
         self.toolBar.addAction(self.actionEqualizer)
         self.toolBar.addAction(self.actionSpectrogram)
-                                                                        #Methods
+                                                                        #Methods' Declaration
         getFile = Data.getFile
         retranslateUi = RetranslateUI.retranslateUi
+        ShowSpectrogram = Spectrogram.ShowSpectrogram
+        ShowEqualizer = Equalizer.ShowEqualizer
+        ZoomIn = Navigations.Zoom_in
+        ZoomOut = Navigations.Zoom_out
+        ScrollLeft = Navigations.scroll_left
+        ScrollRight = Navigations.scroll_right
+                                                                        #Calling Methods
         retranslateUi(self, MainWindow)
-        #self.tabWidget.setCurrentIndex(0)
-        #QtCore.QMetaObject.connectSlotsByName(MainWindow)
         self.actionOpen.triggered.connect(lambda checked: getFile(self))
+        self.actionSpectrogram.triggered.connect(
+            lambda checked: ShowSpectrogram(self,MainWindow))
+        self.actionEqualizer.triggered.connect(
+            lambda checked: ShowEqualizer(self, MainWindow))
+        self.actionZoom_in.triggered.connect(lambda checked: ZoomIn(self))
+        self.actionZoom_out.triggered.connect(lambda checked: ZoomOut(self))
+        self.actionLeft.triggered.connect(lambda checked: ScrollLeft(self))
+        self.actionRight.triggered.connect(lambda checked: ScrollRight(self))
+        
 
    
 
