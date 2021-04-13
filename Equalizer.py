@@ -1,4 +1,5 @@
-
+import math
+import numpy as np
 def ShowEqualizer(self, MainWindow):
     if self.actionEqualizer.isChecked():
         if self.actionSpectrogram.isChecked():
@@ -21,3 +22,5 @@ def ShowEqualizer(self, MainWindow):
         
         self.Graph_Before.resize(0, 0)
         self.frame.resize(0, 0)
+
+

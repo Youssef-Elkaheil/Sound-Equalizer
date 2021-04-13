@@ -1,6 +1,6 @@
 def Zoom_in(self):
     xrange, yrange = self.Graph_After.viewRange()
-    if xrange[1] > len(self.data)/100:
+    if xrange[1]-xrange[0] > len(self.data)/100:
         self.Graph_After.setXRange(xrange[0]/2 , xrange[1]/2 , padding=0)
         self.Graph_Before.setXRange(xrange[0]/2 , xrange[1]/2 , padding=0)
 
@@ -18,16 +18,16 @@ def Zoom_out(self):
 def scroll_right(self):
     xrange, yrange = self.Graph_After.viewRange()
     if xrange[1]<len(self.data):
-        self.Graph_After.setXRange(xrange[0] + 500, xrange[1] + 500, padding=0)
+        self.Graph_After.setXRange(xrange[0] + 100, xrange[1] + 100, padding=0)
         self.Graph_Before.setXRange(
-            xrange[0] + 500, xrange[1] + 500, padding=0)
+            xrange[0] + 100, xrange[1] + 100, padding=0)
 
 
 def scroll_left(self):
     xrange, yrange = self.Graph_After.viewRange()
     if xrange[0]>0:
-        self.Graph_After.setXRange(xrange[0] - 500, xrange[1] - 500, padding=0)
+        self.Graph_After.setXRange(xrange[0] - 100, xrange[1] - 100, padding=0)
         self.Graph_Before.setXRange(
-            xrange[0] - 500, xrange[1] - 500, padding=0)
+            xrange[0] - 100, xrange[1] - 100, padding=0)
 
 

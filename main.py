@@ -311,15 +311,15 @@ class Ui_MainWindow(object):
         ScrollRight = Navigations.scroll_right
                                                                         #Calling Methods
         retranslateUi(self, MainWindow)
-        self.actionOpen.triggered.connect(lambda checked: getFile(self))
+        self.actionOpen.triggered.connect(lambda : getFile(self))
         self.actionSpectrogram.triggered.connect(
-            lambda checked: ShowSpectrogram(self,MainWindow))
+            lambda : ShowSpectrogram(self,MainWindow))
         self.actionEqualizer.triggered.connect(
-            lambda checked: ShowEqualizer(self, MainWindow))
-        self.actionZoom_in.triggered.connect(lambda checked: ZoomIn(self))
-        self.actionZoom_out.triggered.connect(lambda checked: ZoomOut(self))
-        self.actionLeft.triggered.connect(lambda checked: ScrollLeft(self))
-        self.actionRight.triggered.connect(lambda checked: ScrollRight(self))
+            lambda : ShowEqualizer(self, MainWindow))
+        self.actionZoom_in.triggered.connect(lambda : ZoomIn(self))
+        self.actionZoom_out.triggered.connect(lambda : ZoomOut(self))
+        self.actionLeft.triggered.connect(lambda : ScrollLeft(self))
+        self.actionRight.triggered.connect(lambda : ScrollRight(self))
         
 
    

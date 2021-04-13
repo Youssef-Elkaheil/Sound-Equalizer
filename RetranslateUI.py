@@ -2,16 +2,9 @@ from PyQt5 import QtCore
 def retranslateUi(self, MainWindow):
     _translate = QtCore.QCoreApplication.translate
     MainWindow.setWindowTitle(_translate("MainWindow", "Equalizer"))
-    self.label[0].setText(_translate("MainWindow", "1/10"))
-    self.label[1].setText(_translate("MainWindow", "2/10"))
-    self.label[2].setText(_translate("MainWindow", "3/10"))
-    self.label[3].setText(_translate("MainWindow", "4/10"))
-    self.label[4].setText(_translate("MainWindow", "5/10"))
-    self.label[5].setText(_translate("MainWindow", "6/10"))
-    self.label[6].setText(_translate("MainWindow", "7/10"))
-    self.label[7].setText(_translate("MainWindow", "8/10"))
-    self.label[8].setText(_translate("MainWindow", "9/10"))
-    self.label[9].setText(_translate("MainWindow", "10/10"))
+    for i in range(10):
+        self.label[i].setText(_translate("MainWindow", "{}/10".format(i)))
+        
     self.tabWidget.setTabText(self.tabWidget.indexOf(
         self.tab), _translate("MainWindow", "Tab 1"))
     self.menuFile.setTitle(_translate("MainWindow", "File"))
