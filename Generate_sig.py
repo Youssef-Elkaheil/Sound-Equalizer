@@ -20,8 +20,8 @@ def generatingSignal():
         itr = 0
         for x in range(data_size):
             if x > itr:
-                itr += 100
-                freq += 10
+                itr += 10000
+                freq += 20
             sine_list.append(math.sin(2 * math.pi * freq * (x / frate)))
         wav_file = wave.open(fname, 'w')
         wav_file.setparams(
