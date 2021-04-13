@@ -1,5 +1,5 @@
 from PyQt5 import QtCore, QtGui, QtWidgets
-from pyqtgraph import PlotWidget
+import pyqtgraph as pg
 import RetranslateUI
 import Spectrogram
 import Navigations
@@ -47,17 +47,49 @@ class Ui_MainWindow(object):
         self.tabWidget.setObjectName("tabWidget")
         self.tab = QtWidgets.QWidget()
         self.tab.setObjectName("tab")
-        self.Graph_Before = PlotWidget(self.tab)
+        self.Graph_Before = pg.PlotWidget(self.tab)
         self.Graph_Before.setGeometry(QtCore.QRect(50, 550, 0 , 0))
         self.Graph_Before.setObjectName("Graph_Before")
         self.Graph_Before.setTitle("Before")
-        self.Spectrogram_Before = PlotWidget(self.tab)
+
+        self.Spectrogram_Before = pg.GraphicsLayoutWidget(self.tab)
         self.Spectrogram_Before.setGeometry(QtCore.QRect(1050, 520, 0, 0))
         self.Spectrogram_Before.setObjectName("Spectrogram_Before")
-        self.Spectrogram_After = PlotWidget(self.tab)
+        self.Spectroplot_Before = self.Spectrogram_Before.addPlot()
+
+        self.img_Before = pg.ImageItem()
+        self.Spectroplot_Before.addItem(self.img_Before)
+        self.hist_Before = pg.HistogramLUTItem()
+        self.hist_Before.setImageItem(self.img_Before)
+
+        self.Spectrogram_Before.addItem(self.hist_Before)
+        self.Spectrogram_Before.show()
+        self.hist_Before.gradient.restoreState(
+            {'mode': 'rgb',
+                'ticks': [(0.5, (0, 182, 188, 255)),
+                          (1.0, (246, 111, 0, 255)),
+                          (0.0, (75, 0, 113, 255))]})
+
+
+        self.Spectrogram_After = pg.GraphicsLayoutWidget(self.tab)
         self.Spectrogram_After.setGeometry(QtCore.QRect(1050, 10, 0, 0))
         self.Spectrogram_After.setObjectName("Spectrogram_After")
-        self.Graph_After = PlotWidget(self.tab)
+        self.Spectroplot_After = self.Spectrogram_After.addPlot()
+
+        self.img_After = pg.ImageItem()
+        self.Spectroplot_After.addItem(self.img_After)
+        self.hist_After = pg.HistogramLUTItem()
+        self.hist_After.setImageItem(self.img_After)
+        
+        self.Spectrogram_After.addItem(self.hist_After)
+        self.Spectrogram_After.show()
+        self.hist_After.gradient.restoreState(
+            {'mode': 'rgb',
+                'ticks': [(0.5, (0, 182, 188, 255)),
+                          (1.0, (246, 111, 0, 255)),
+                          (0.0, (75, 0, 113, 255))]})
+
+        self.Graph_After = pg.PlotWidget(self.tab)
         self.Graph_After.setGeometry(QtCore.QRect(50, 10, 961, 271))
         self.Graph_After.setObjectName("Graph_After")
         self.Graph_After.setTitle("After")

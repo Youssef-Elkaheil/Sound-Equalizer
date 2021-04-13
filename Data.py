@@ -1,8 +1,8 @@
 from PyQt5.QtWidgets import QFileDialog
 import librosa
 import os
-
-
+import Spectrogram
+spectrogram = Spectrogram.Spectrogram
 def getFile(self):
         """ This function will get the address of the csv file location
 			also calls a readData function 
@@ -28,6 +28,8 @@ def plotData(self, fileName):
     self.Graph_Before.setLabel("left", "Amplitude")
     self.Graph_Before.setLabel("bottom", "Time")
     self.Graph_Before.plot(self.data)
+
+    spectrogram(self,self.data)
     print(self.data)
     print(len(self.data))
 

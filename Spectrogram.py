@@ -26,11 +26,25 @@ def ShowSpectrogram(self,MainWindow):
 
 
 def Spectrogram(self, data):
-    sampling_freq = 10e3
-    freq, time, spectrogramPlot = signal.spectrogram(data, sampling_freq)
-    self.img1.setImage(spectrogramPlot)
-    self.img1.scale(time[-1]/np.size(spectrogramPlot, axis=1),
+    sampling_freq = 10e2*3
+    filtered_data = data[1000:]
+    freq, time, spectrogramPlot = signal.spectrogram(filtered_data, sampling_freq)
+    self.hist_Before.setLevels(np.min(spectrogramPlot),
+                         np.max(spectrogramPlot))
+    self.img_Before.setImage(spectrogramPlot)
+    self.img_Before.scale(time[-1]/np.size(spectrogramPlot, axis=1),
                     freq[-1]/np.size(spectrogramPlot, axis=0))
-    self.Spectroplot1.setLimits(xMin=0, xMax=time[-1], yMin=0, yMax=freq[-1])
-    self.Spectroplot1.setLabel('bottom', "Time")
-    self.Spectroplot1.setLabel('left', "Frequency")
+    self.Spectroplot_Before.setLimits(
+        xMin=0, xMax=time[-1], yMin=0, yMax=freq[-1])
+    self.Spectroplot_Before.setLabel('bottom', "Time")
+    self.Spectroplot_Before.setLabel('left', "Frequency")
+
+    self.hist_After.setLevels(np.min(spectrogramPlot),
+                               np.max(spectrogramPlot))
+    self.img_After.setImage(spectrogramPlot)
+    self.img_After.scale(time[-1]/np.size(spectrogramPlot, axis=1),
+                          freq[-1]/np.size(spectrogramPlot, axis=0))
+    self.Spectroplot_After.setLimits(
+        xMin=0, xMax=time[-1], yMin=0, yMax=freq[-1])
+    self.Spectroplot_After.setLabel('bottom', "Time")
+    self.Spectroplot_After.setLabel('left', "Frequency")
