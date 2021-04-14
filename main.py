@@ -309,8 +309,12 @@ class Ui_MainWindow(object):
         ZoomOut = Navigations.Zoom_out
         ScrollLeft = Navigations.scroll_left
         ScrollRight = Navigations.scroll_right
-        gain=Equalizer.gain
-        bands=Equalizer.getBands
+        # gain=Equalizer.gain
+        # bands=Equalizer.getBands
+        self.timer = QtCore.QTimer()
+        self.timer.timeout.connect(self.Update)
+        self.timer.setInterval(10)
+        self.timer.start()
 
         
                                                                         #Calling Methods
@@ -325,6 +329,36 @@ class Ui_MainWindow(object):
         self.actionLeft.triggered.connect(lambda : ScrollLeft(self))
         self.actionRight.triggered.connect(lambda : ScrollRight(self))
         self.Slider[0].valueChanged.connect(lambda: gain(self,9,self.Slider[0].value()))
+        self.actionPlay.triggered.connect(self.play)
+        # self.actionPause.triggered.connect(self.pause)
+
+    def play_pause(self):
+        if self.actionPlay_Pause.isChecked():
+            self.timer.start()
+            self.actionPause.setChecked(False)
+            self.actionPlay.setChecked(True)
+        else:
+            self.timer.stop()
+            self.actionPlay.setChecked(False)
+            self.actionPause.setChecked(True)
+
+    def play(self):
+       
+        self.timer.start()
+        self.actionPause.setChecked(False)
+
+    def pause(self):
+        
+        self.timer.stop()
+        self.actionPlay.setChecked(False)
+
+    def Update(self):
+        
+        if len(self.data) > 0 and self.actionPlay.isChecked():
+            xrange1, yrange1 = self.Graph_After.viewRange()
+            self.Graph_After.setXRange(xrange1[0]+1, xrange1[1] +1, padding=0)
+            if xrange1[1]>len(self.data)-100:
+                self.timer.stop()
 
         
 
