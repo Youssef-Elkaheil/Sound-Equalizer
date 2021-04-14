@@ -1,5 +1,6 @@
 import math
 import numpy as np
+
 def ShowEqualizer(self, MainWindow):
     if self.actionEqualizer.isChecked():
         if self.actionSpectrogram.isChecked():
@@ -22,5 +23,33 @@ def ShowEqualizer(self, MainWindow):
         
         self.Graph_Before.resize(0, 0)
         self.frame.resize(0, 0)
+
+def getBands(self):
+        bands=[]
+        eq_bands=[]
+        BW = math.ceil(len(np.abs(self.data))/20)
+
+        for i in range(0, 20):
+            bands.append(self.data[i*BW:(i+1)*BW])
+
+        eq_bands.clear()
+        eq_bands = bands.copy()
+   
+
+def gain(self,i,Gain=1):
+    after_eq=[]
+    after_eq.clear()
+
+    self.eq_bands[i]=self.bands[i]*Gain
+    self.eq_bands[20-i-1]=self.bands[20-i-1]*Gain
+    for sublist in self.eq_bands :
+        for x in sublist:
+                after_eq.append(x)
+    recover=np.array(self.recover_signal())
+
+    self.fft(3,recover)
+    self.Graph_After.clear()
+    self.Graph_After.plot(recover)
+
 
 

@@ -309,6 +309,10 @@ class Ui_MainWindow(object):
         ZoomOut = Navigations.Zoom_out
         ScrollLeft = Navigations.scroll_left
         ScrollRight = Navigations.scroll_right
+        gain=Equalizer.gain
+        bands=Equalizer.getBands
+
+        
                                                                         #Calling Methods
         retranslateUi(self, MainWindow)
         self.actionOpen.triggered.connect(lambda : getFile(self))
@@ -320,6 +324,8 @@ class Ui_MainWindow(object):
         self.actionZoom_out.triggered.connect(lambda : ZoomOut(self))
         self.actionLeft.triggered.connect(lambda : ScrollLeft(self))
         self.actionRight.triggered.connect(lambda : ScrollRight(self))
+        self.Slider[0].valueChanged.connect(lambda: gain(self,9,self.Slider[0].value()))
+
         
 
    
