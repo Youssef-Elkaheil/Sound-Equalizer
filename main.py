@@ -313,6 +313,7 @@ class Ui_MainWindow(object):
         # bands=Equalizer.getBands
         self.timer = QtCore.QTimer()
         self.timer.timeout.connect(self.Update)
+        # self.timer.timeout.connect(self.Update_faster)
         self.timer.setInterval(10)
         self.timer.start()
 
@@ -331,6 +332,10 @@ class Ui_MainWindow(object):
         self.Slider[0].valueChanged.connect(lambda: gain(self,9,self.Slider[0].value()))
         self.actionPlay.triggered.connect(self.play)
         # self.actionPause.triggered.connect(self.pause)
+        self.actionFaster.triggered.connect(self.Update_faster)
+        self.actionSlower.triggered.connect(self.Update_slower)
+        # self.actionFaster.triggered.connect(self.Update_faster)
+
 
     def play_pause(self):
         if self.actionPlay_Pause.isChecked():
@@ -351,18 +356,40 @@ class Ui_MainWindow(object):
         
         self.timer.stop()
         self.actionPlay.setChecked(False)
+    x=1
 
     def Update(self):
         
         if len(self.data) > 0 and self.actionPlay.isChecked():
             xrange1, yrange1 = self.Graph_After.viewRange()
-            self.Graph_After.setXRange(xrange1[0]+1, xrange1[1] +1, padding=0)
+            self.Graph_After.setXRange(xrange1[0]+(self.x), xrange1[1] +(self.x) ,padding=0)
             if xrange1[1]>len(self.data)-100:
                 self.timer.stop()
 
-        
+    def Update_faster(self):
+        #  if len(self.data) > 0 and  self.actionFaster.isChecked():
+        #         xrange1, yrange1 = self.Graph_After.viewRange()
+        #         for  x in range (10-1000):    
+        #             self.Graph_After.setXRange(xrange1[0]+(10*x), xrange1[1] +(10*x), padding=0)
+        #             x+=50
 
+        #         if xrange1[1]>len(self.data)-100:
+        #             self.timer.stop()            
+        
+        self.x+=50
+    def Update_slower(self):
+        #  if len(self.data) > 0 and  self.actionFaster.isChecked():
+        #         xrange1, yrange1 = self.Graph_After.viewRange()
+        #         for  x in range (10-1000):    
+        #             self.Graph_After.setXRange(xrange1[0]+(10*x), xrange1[1] +(10*x), padding=0)
+        #             x+=50
+
+        #         if xrange1[1]>len(self.data)-100:
+        #             self.timer.stop()            
+        
+        self.x-=50
    
+
 
 
 if __name__ == "__main__":
