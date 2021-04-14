@@ -4,8 +4,8 @@ import os
 import Spectrogram
 spectrogram = Spectrogram.Spectrogram
 def getFile(self):
-        """ This function will get the address of the csv file location
-			also calls a readData function 
+        """ This function will get the address of the Wav file location
+			also calls a plotData function 
 		"""
         self.filePath = QFileDialog.getOpenFileName(filter="wav (*.wav)")[0]
         print("File :", self.filePath)
@@ -33,3 +33,5 @@ def plotData(self, fileName):
     print(self.data)
     print(len(self.data))
 
+
+    

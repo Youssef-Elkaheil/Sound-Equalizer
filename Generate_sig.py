@@ -49,7 +49,6 @@ def generatingSignal():
     plt.xlabel('Frequency (Hz)')
     plt.ylabel('Amplitude')
     plt.show()
-#   
 
     if __name__ == '__main__':
         data_size = 40000
