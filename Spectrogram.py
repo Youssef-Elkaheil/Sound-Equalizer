@@ -48,3 +48,4 @@ def Spectrogram(self, data):
         xMin=0, xMax=time[-1], yMin=0, yMax=freq[-1])
     self.Spectroplot_After.setLabel('bottom', "Time")
     self.Spectroplot_After.setLabel('left', "Frequency")
+    print

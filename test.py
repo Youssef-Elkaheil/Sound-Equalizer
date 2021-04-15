@@ -19,16 +19,14 @@ def generate_sine_wave(freq, sample_rate, duration):
 x, y = generate_sine_wave(2, SAMPLE_RATE, DURATION)
 #plt.plot(x, y)
 #plt.show()
+mixed_tone =0
+for i in range(10):
+    _, nice_tone = generate_sine_wave(100*i, SAMPLE_RATE, DURATION)
+    nice_tone *=0.1*(10-i)
+    mixed_tone += nice_tone
 
 
-_, nice_tone = generate_sine_wave(400, SAMPLE_RATE, DURATION)
-_, noise_tone = generate_sine_wave(4000, SAMPLE_RATE, DURATION)
-noise_tone = noise_tone * 0.3
-
-mixed_tone = nice_tone + noise_tone
-
-
-
+#mixed_tone = nice_tone + noise_tone 
 
 
 normalized_tone = np.int16((mixed_tone / mixed_tone.max()) * 32767)
@@ -43,22 +41,23 @@ write("mysinewave.wav", SAMPLE_RATE, normalized_tone)
 
 # Number of samples in normalized_tone
 N = SAMPLE_RATE * DURATION
-
+print(SAMPLE_RATE , DURATION)
 
 # Note the extra 'r' at the front
 yrf = rfft(normalized_tone)
 xrf = rfftfreq(N, 1 / SAMPLE_RATE)
-
+#print(yrf)
+#print(xrf)
 plt.plot(xrf, np.abs(yrf))
 plt.show()
 
 # The maximum frequency is half the sample rate
 points_per_freq = len(xrf) / (SAMPLE_RATE / 2)
-
+#print(points_per_freq)
 # Our target frequency is 4000 Hz
-target_idx = int(points_per_freq * 4000)
-
-yrf[target_idx - 1: target_idx + 2] = 0
+target_idx = int(points_per_freq * 200)
+#print (target_idx)
+yrf[target_idx -1:] *=0
 
 plt.plot(xrf, np.abs(yrf))
 plt.show()

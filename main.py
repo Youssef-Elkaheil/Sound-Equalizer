@@ -6,6 +6,9 @@ import Navigations
 import Resources
 import Equalizer
 import Data
+import numpy as np
+from scipy.fft import irfft
+from scipy.fft import rfft, rfftfreq
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
@@ -122,6 +125,7 @@ class Ui_MainWindow(object):
                 self.Slider[i].sizePolicy().hasHeightForWidth())
             self.Slider[i].setSizePolicy(sizePolicy)
             self.Slider[i].setMaximum(5)
+            self.Slider[i].setMinimum(0)
             self.Slider[i].setSliderPosition(1)
             self.Slider[i].setOrientation(QtCore.Qt.Vertical)
             self.Slider[i].setInvertedControls(False)
@@ -149,7 +153,14 @@ class Ui_MainWindow(object):
             self.label[i].setObjectName("label_{}".format(i+1))
             self.horizontalLayout_2.addWidget(self.label[i])
 
-        self.tabWidget.addTab(self.tab, "")
+        self.tabWidget.addTab(self.tab, "Tab 1")
+
+        self.timer = QtCore.QTimer()
+        self.timer.timeout.connect(lambda : play(self))
+        self.timer.setInterval(10)
+        self.timer.start()
+
+
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtWidgets.QMenuBar(MainWindow)
         self.menubar.setGeometry(QtCore.QRect(0, 0, 1537, 26))
@@ -309,12 +320,10 @@ class Ui_MainWindow(object):
         ZoomOut = Navigations.Zoom_out
         ScrollLeft = Navigations.scroll_left
         ScrollRight = Navigations.scroll_right
-        # gain=Equalizer.gain
+        play = Navigations.Update
+        #Gain=Equalizer.Gain
         # bands=Equalizer.getBands
-        self.timer = QtCore.QTimer()
-        self.timer.timeout.connect(self.Update)
-        self.timer.setInterval(10)
-        self.timer.start()
+        
 
         
                                                                         #Calling Methods
@@ -328,41 +337,52 @@ class Ui_MainWindow(object):
         self.actionZoom_out.triggered.connect(lambda : ZoomOut(self))
         self.actionLeft.triggered.connect(lambda : ScrollLeft(self))
         self.actionRight.triggered.connect(lambda : ScrollRight(self))
-        self.Slider[0].valueChanged.connect(lambda: gain(self,9,self.Slider[0].value()))
-        self.actionPlay.triggered.connect(self.play)
-        # self.actionPause.triggered.connect(self.pause)
+        self.actionPlay.triggered.connect(lambda : self.timer.start)
+        # for i in range(10):
+        self.Slider[0].valueChanged.connect(lambda: self.Gain(0,self.Slider[0].value()))
+        self.Slider[1].valueChanged.connect(
+            lambda: self.Gain(1, self.Slider[1].value()))
+        self.Slider[2].valueChanged.connect(
+            lambda: self.Gain(2, self.Slider[2].value()))
+        self.Slider[3].valueChanged.connect(
+            lambda: self.Gain(3, self.Slider[3].value()))
+        self.Slider[4].valueChanged.connect(
+            lambda: self.Gain(4, self.Slider[4].value()))
+        self.Slider[5].valueChanged.connect(
+                lambda: self.Gain(5, self.Slider[5].value()))
+        self.Slider[6].valueChanged.connect(
+            lambda: self.Gain(6, self.Slider[6].value()))
+        self.Slider[7].valueChanged.connect(
+            lambda: self.Gain(7, self.Slider[7].value()))
+        self.Slider[8].valueChanged.connect(
+            lambda: self.Gain(8, self.Slider[8].value()))
+        self.Slider[9].valueChanged.connect(
+            lambda: self.Gain(9, self.Slider[9].value()))
+        #self.actionSave.triggered.connect(self.Gain)
 
-    def play_pause(self):
-        if self.actionPlay_Pause.isChecked():
-            self.timer.start()
-            self.actionPause.setChecked(False)
-            self.actionPlay.setChecked(True)
-        else:
-            self.timer.stop()
-            self.actionPlay.setChecked(False)
-            self.actionPause.setChecked(True)
-
-    def play(self):
-       
-        self.timer.start()
-        self.actionPause.setChecked(False)
-
-    def pause(self):
-        
-        self.timer.stop()
-        self.actionPlay.setChecked(False)
-
-    def Update(self):
-        
-        if len(self.data) > 0 and self.actionPlay.isChecked():
-            xrange1, yrange1 = self.Graph_After.viewRange()
-            self.Graph_After.setXRange(xrange1[0]+1, xrange1[1] +1, padding=0)
-            if xrange1[1]>len(self.data)-100:
-                self.timer.stop()
 
         
 
-   
+    def Gain(self,slider,Gain):
+        self.sampling_rate =10e2*3
+        self.N = self.sampling_rate * len(self.data)/10000
+        normalized_tone = np.int16((self.data / self.data.max()) * 32767)
+
+        self.yrfft = rfft(normalized_tone)
+        print(self.sampling_rate , len(self.data)/10000)
+        self.xrfft = rfftfreq(int(self.N), 1.0 / self.sampling_rate)
+        self.points_per_freq = int(len(self.xrfft) / (self.sampling_rate / 2))
+
+        self.BW = int(self.points_per_freq*(self.sampling_rate / 20))
+        self.yrfft[slider *self.BW : (slider+1)*self.BW] *=Gain
+        self.yt = irfft(self.yrfft)
+        self.Graph_After.clear()
+        self.Graph_After.setTitle('After', color='w', size='12pt')
+        self.Graph_After.setLabel("left", "Amplitude")
+        self.Graph_After.setLabel("bottom", "Time")
+
+        self.Graph_After.plot(self.yt)
+        #write("Result.wav", self.sampling_rate, self.yt)
 
 
 if __name__ == "__main__":

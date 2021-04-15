@@ -3,13 +3,10 @@ import struct
 import wave
 from matplotlib import pyplot as plt
 import numpy as np
-from scipy import fftpack
 import scipy.io.wavfile as wavfile
 import scipy.fftpack as fftpk
 import numpy as np
-from matplotlib import pyplot as plt
 from scipy.fft import fft, ifft
-import  matplotlib
 
 
 
@@ -31,8 +28,8 @@ def generatingSignal():
         itr = 0
     for x in range(data_size):
         if x > itr:
-            itr += 1000
-            freq += 10
+            itr += 200
+            freq += 20
         sine_list.append(math.sin(2 * math.pi * freq * (x / frate)))
     wav_file = wave.open(fname, 'w')
     wav_file.setparams(
@@ -40,8 +37,8 @@ def generatingSignal():
     for v in sine_list:
         wav_file.writeframes(struct.pack('h', int(v * amp / 2)))
     wav_file.close()
-    s_rate, signal = wavfile.read("test.wav") 
-
+    s_rate, signal = wavfile.read("mysinewave.wav") 
+    print(s_rate , signal)
     FFT = abs(fft(signal))
     freqs = fftpk.fftfreq(len(FFT), (1.0/s_rate))
 

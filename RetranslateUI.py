@@ -3,7 +3,7 @@ def retranslateUi(self, MainWindow):
     _translate = QtCore.QCoreApplication.translate
     MainWindow.setWindowTitle(_translate("MainWindow", "Equalizer"))
     for i in range(10):
-        self.label[i].setText(_translate("MainWindow", "{}/10".format(i)))
+        self.label[i].setText(_translate("MainWindow", "{}/10".format(i+1)))
         
     self.tabWidget.setTabText(self.tabWidget.indexOf(
         self.tab), _translate("MainWindow", "Tab 1"))
