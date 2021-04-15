@@ -37,6 +37,8 @@ def retranslateUi(self, MainWindow):
         _translate("MainWindow", "Ctrl+Shift+Left"))
     self.actionPlay.setText(_translate("MainWindow", "Play"))
     self.actionPlay.setShortcut(_translate("MainWindow", "Space"))
+    self.actionSound.setText(_translate("MainWindow", "Sound"))
+    self.actionSound.setShortcut(_translate("MainWindow", "Ctrl+S"))
     self.actionSpectrogram.setText(_translate("MainWindow", "Spectrogram"))
     self.actionSpectrogram.setShortcut(_translate("MainWindow", "Ctrl+F"))
     self.actionEqualizer.setText(_translate("MainWindow", "Equalizer"))
@@ -47,3 +49,4 @@ def retranslateUi(self, MainWindow):
     self.actionGraph_theme.setText(_translate("MainWindow", "Graph"))
     self.actionSpectrogram_theme.setText(
         _translate("MainWindow", "Spectrogram"))
+    # self.push
