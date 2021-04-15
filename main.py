@@ -6,6 +6,27 @@ import Navigations
 import Resources
 import Equalizer
 import Data
+from PyQt5 import QtMultimedia as M
+import sys
+# from Stage import Ui_Form
+# from tabs import *
+
+# class TabPage(QtWidgets.QWidget):
+#     def __init__(self, parent=None):
+#         super().__init__(parent)
+#         group = QtWidgets.QGroupBox('Monty Python')
+#         layout = QtWidgets.QVBoxLayout(self)
+#         layout.addWidget(group)
+#         grid = QtWidgets.QGridLayout(group)
+#         grid.addWidget(QtWidgets.QLabel('Enter a name:'), 0, 0)
+#         grid.addWidget(QtWidgets.QLabel('Choose a number:'), 0, 1)
+#         grid.addWidget(QtWidgets.QLineEdit(), 1, 0)
+#         grid.addWidget(QtWidgets.QComboBox(), 1, 1)
+#         grid.addWidget(QtWidgets.QPushButton('Click Me!'), 1, 2)
+#         grid.addWidget(QtWidgets.QSpinBox(), 2, 0)
+#         grid.addWidget(QtWidgets.QPushButton('Clear Text'), 2, 2)
+#         grid.addWidget(QtWidgets.QTextEdit(), 3, 0, 1, 3)
+
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
@@ -250,6 +271,16 @@ class Ui_MainWindow(object):
             ":/Resources/images/Equalizer.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self.actionEqualizer.setIcon(icon11)
         self.actionEqualizer.setObjectName("actionEqualizer")
+        self.actionSound = QtWidgets.QAction(MainWindow)
+        self.actionSound.setCheckable(True)
+        self.actionSound.setChecked(False)
+        icon12 = QtGui.QIcon() 
+        icon12.addPixmap(QtGui.QPixmap(
+            "images/sound.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)  
+        self.actionSound.setIcon(icon12)    
+        self.actionSound.setObjectName("actionSound")
+        
+
         self.actionExit = QtWidgets.QAction(MainWindow)
         self.actionExit.setObjectName("actionExit")
         self.actionClose_Tab = QtWidgets.QAction(MainWindow)
@@ -275,6 +306,7 @@ class Ui_MainWindow(object):
         self.menuNavigation.addAction(self.menuScroll.menuAction())
         self.menuNavigation.addSeparator()
         self.menuNavigation.addAction(self.actionPlay)
+        self.menuNavigation.addAction(self.actionSound)
         self.menuNavigation.addAction(self.menuSpeed.menuAction())
         self.menuEdit.addAction(self.actionSpectrogram)
         self.menuEdit.addSeparator()
@@ -295,6 +327,7 @@ class Ui_MainWindow(object):
         self.toolBar.addAction(self.actionSlower)
         self.toolBar.addAction(self.actionLeft)
         self.toolBar.addAction(self.actionPlay)
+        self.toolBar.addAction(self.actionSound)
         self.toolBar.addAction(self.actionRight)
         self.toolBar.addAction(self.actionFaster)
         self.toolBar.addSeparator()
@@ -329,13 +362,30 @@ class Ui_MainWindow(object):
         self.actionZoom_out.triggered.connect(lambda : ZoomOut(self))
         self.actionLeft.triggered.connect(lambda : ScrollLeft(self))
         self.actionRight.triggered.connect(lambda : ScrollRight(self))
-        self.Slider[0].valueChanged.connect(lambda: gain(self,9,self.Slider[0].value()))
+        self.Slider[0].valueChanged.connect(lambda: self.gain(self,9,self.Slider[0].value()))
         self.actionPlay.triggered.connect(self.play)
         # self.actionPause.triggered.connect(self.pause)
         self.actionFaster.triggered.connect(self.Update_faster)
         self.actionSlower.triggered.connect(self.Update_slower)
         # self.actionFaster.triggered.connect(self.Update_faster)
+        self.actionSound.triggered.connect(self.sound)
+        # self.actionMute.triggered.connect(self.Mute)
+        self.url=QtCore.QUrl.fromLocalFile('test.wav')
+        self.content=M.QMediaContent(self.url)
+        self.player=M.QMediaPlayer()
+        self.player.setMedia(self.content)
+        # self.tabs = QtWidgets.QTabWidget()
+        # layout = QtWidgets.QVBoxLayout()
+        # layout.addWidget(self.tabs)
+        # button = QtWidgets.QToolButton()
+        # button.setToolTip('Add New Tab')
+        # button.clicked.connect(self.addNewTab)
+        # button.setIcon(self.style().standardIcon(
+        #     QtWidgets.QStyle.SP_DialogYesButton))
+        # self.tabs.setCornerWidget(button, QtCore.Qt.TopRightCorner)
+        # self.addNewTab()
 
+    
 
     def play_pause(self):
         if self.actionPlay_Pause.isChecked():
@@ -389,7 +439,13 @@ class Ui_MainWindow(object):
         
         self.x-=50
    
-
+    def sound(self):
+        self.player.play()
+    def pause(self):
+        self.player.pause()    
+    def addNewTab(self):
+        text = 'Tab %d' % (self.tabs.count() + 1)
+        self.tabs.addTab(TabPage(self.tabs), text)
 
 
 if __name__ == "__main__":
