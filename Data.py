@@ -1,5 +1,4 @@
 from PyQt5.QtWidgets import QFileDialog
-
 import librosa
 import os
 import Spectrogram

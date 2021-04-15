@@ -180,6 +180,7 @@ class Ui_MainWindow(object):
         self.timer.timeout.connect(lambda : play(self))
         self.timer.setInterval(10)
         self.timer.start()
+        self.speed = 1000
 
 
         MainWindow.setCentralWidget(self.centralwidget)
@@ -354,7 +355,10 @@ class Ui_MainWindow(object):
         ScrollLeft = Navigations.scroll_left
         ScrollRight = Navigations.scroll_right
         play = Navigations.Update
-        #Gain=Equalizer.Gain
+        SpeedUp = Navigations.SpeedUp
+        SpeedDown =Navigations.SpeedDown
+        Gain=Equalizer.Gain
+
         # bands=Equalizer.getBands
         
 
@@ -370,73 +374,42 @@ class Ui_MainWindow(object):
         self.actionZoom_out.triggered.connect(lambda : ZoomOut(self))
         self.actionLeft.triggered.connect(lambda : ScrollLeft(self))
         self.actionRight.triggered.connect(lambda : ScrollRight(self))
-        self.actionPlay.triggered.connect(lambda : self.timer.start)
-        # for i in range(10):
-        self.Slider[0].valueChanged.connect(lambda: self.Gain(0,self.Slider[0].value()))
-        self.Slider[1].valueChanged.connect(
-            lambda: self.Gain(1, self.Slider[1].value()))
-        self.Slider[2].valueChanged.connect(
-            lambda: self.Gain(2, self.Slider[2].value()))
-        self.Slider[3].valueChanged.connect(
-            lambda: self.Gain(3, self.Slider[3].value()))
-        self.Slider[4].valueChanged.connect(
-            lambda: self.Gain(4, self.Slider[4].value()))
-        self.Slider[5].valueChanged.connect(
-                lambda: self.Gain(5, self.Slider[5].value()))
-        self.Slider[6].valueChanged.connect(
-            lambda: self.Gain(6, self.Slider[6].value()))
-        self.Slider[7].valueChanged.connect(
-            lambda: self.Gain(7, self.Slider[7].value()))
-        self.Slider[8].valueChanged.connect(
-            lambda: self.Gain(8, self.Slider[8].value()))
-        self.Slider[9].valueChanged.connect(
-            lambda: self.Gain(9, self.Slider[9].value()))
+        self.actionPlay.triggered.connect(self.timer.start)
+        self.actionFaster.triggered.connect(lambda : SpeedUp(self))
+        self.actionSlower.triggered.connect(lambda: SpeedDown(self))
+        for i in range(10):
+            self.Slider[i].valueChanged.connect(lambda: Gain(i,self.Slider[i].value()))
+        # self.Slider[1].valueChanged.connect(
+        #     lambda: self.Gain(1, self.Slider[1].value()))
+        # self.Slider[2].valueChanged.connect(
+        #     lambda: self.Gain(2, self.Slider[2].value()))
+        # self.Slider[3].valueChanged.connect(
+        #     lambda: self.Gain(3, self.Slider[3].value()))
+        # self.Slider[4].valueChanged.connect(
+        #     lambda: self.Gain(4, self.Slider[4].value()))
+        # self.Slider[5].valueChanged.connect(
+        #         lambda: self.Gain(5, self.Slider[5].value()))
+        # self.Slider[6].valueChanged.connect(
+        #     lambda: self.Gain(6, self.Slider[6].value()))
+        # self.Slider[7].valueChanged.connect(
+        #     lambda: self.Gain(7, self.Slider[7].value()))
+        # self.Slider[8].valueChanged.connect(
+        #     lambda: self.Gain(8, self.Slider[8].value()))
+        # self.Slider[9].valueChanged.connect(
+        #     lambda: self.Gain(9, self.Slider[9].value()))
         #self.actionSave.triggered.connect(self.Gain)
-
+        
 
         
 
-    def Gain(self,slider,Gain):
-        self.sampling_rate =10e2*3
-        self.N = self.sampling_rate * len(self.data)/10000
-        normalized_tone = np.int16((self.data / self.data.max()) * 32767)
 
-        self.yrfft = rfft(normalized_tone)
-        print(self.sampling_rate , len(self.data)/10000)
-        self.xrfft = rfftfreq(int(self.N), 1.0 / self.sampling_rate)
-        self.points_per_freq = int(len(self.xrfft) / (self.sampling_rate / 2))
-
-        self.BW = int(self.points_per_freq*(self.sampling_rate / 20))
-        self.yrfft[slider *self.BW : (slider+1)*self.BW] *=Gain
-        self.yt = irfft(self.yrfft)
-        self.Graph_After.clear()
-        self.Graph_After.setTitle('After', color='w', size='12pt')
-        self.Graph_After.setLabel("left", "Amplitude")
-        self.Graph_After.setLabel("bottom", "Time")
-
-        self.Graph_After.plot(self.yt)
-        #write("Result.wav", self.sampling_rate, self.yt)
-        self.timer.stop()
-        self.actionPlay.setChecked(False)
-    x=1
-
-    def Update(self):
         
-        if len(self.data) > 0 and self.actionPlay.isChecked():
-            xrange1, yrange1 = self.Graph_After.viewRange()
-            self.Graph_After.setXRange(xrange1[0]+(self.x), xrange1[1] +(self.x) ,padding=0)
-            if xrange1[1]>len(self.data)-100:
-                self.timer.stop()
-
-    def Update_faster(self):
-        self.x+=50
-    def Update_slower(self):
-        self.x-=50
+ 
    
-    def sound(self):
-        self.player.play()
-    def pause(self):
-        self.player.pause()    
+    # def sound(self):
+    #     self.player.play()
+    # def pause(self):
+    #     self.player.pause()    
 
 
 
