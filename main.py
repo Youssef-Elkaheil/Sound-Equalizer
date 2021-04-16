@@ -1,6 +1,5 @@
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtWidgets import QFileDialog
-from PyQt5 import QtMultimedia as M
 from scipy.fft import rfft, rfftfreq
 from scipy.fft import irfft
 import pyqtgraph as pg
@@ -10,10 +9,9 @@ import Navigations
 import Resources
 import sys
 import numpy as np
-import pandas as pd
 import librosa
 import os
-
+from fpdf import FPDF
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
@@ -345,28 +343,10 @@ class Ui_MainWindow(object):
         self.actionPlay.triggered.connect(self.timer.start)
         self.actionFaster.triggered.connect(lambda : Navigations.SpeedUp(self))
         self.actionSlower.triggered.connect(lambda : Navigations.SpeedDown(self))
-        
+        self.actionSave.triggered.connect(self.saveFile)
         
         for i in range(10):
             self.Slider[i].valueChanged.connect(lambda: self.fft())
-        # self.Slider[1].valueChanged.connect(
-        #     lambda: Gain(self,1, self.Slider[1].value()))
-        # self.Slider[2].valueChanged.connect(
-        #     lambda: Gain(self,2, self.Slider[2].value()))
-        # self.Slider[3].valueChanged.connect(
-        #     lambda: Gain(self,3, self.Slider[3].value()))
-        # self.Slider[4].valueChanged.connect(
-        #     lambda: Gain(self,4, self.Slider[4].value()))
-        # self.Slider[5].valueChanged.connect(
-        #         lambda: Gain(self,5, self.Slider[5].value()))
-        # self.Slider[6].valueChanged.connect(
-        #     lambda: Gain(self,6, self.Slider[6].value()))
-        # self.Slider[7].valueChanged.connect(
-        #     lambda: Gain(self,7, self.Slider[7].value()))
-        # self.Slider[8].valueChanged.connect(
-        #     lambda: Gain(self,8, self.Slider[8].value()))
-        # self.Slider[9].valueChanged.connect(
-        #     lambda: Gain(self,9, self.Slider[9].value()))
      
         
     def getFile(self):
@@ -400,10 +380,7 @@ class Ui_MainWindow(object):
 
     def Spectrogram(self, data):
 
-        self.img_After.clear()
-        self.img_Before.clear()
         pg.setConfigOptions(imageAxisOrder='row-major')
-
         freq, time, spectrogramPlot = signal.spectrogram(
             data, self.sampling_rate)
             
@@ -452,9 +429,67 @@ class Ui_MainWindow(object):
         self.Graph_After.setLabel("bottom", "Time")
         self.Graph_After.setYRange(-5,5)
         self.Graph_After.plot(np.real(self.yt))
+        self.updateSpectrogram(np.real(self.yt))
         # write("Result.wav", self.sampling_rate, self.yt)
 
-    
+    def updateSpectrogram(self,data):
+        self.img_After.clear()
+
+        freq, time, spectrogramPlot = signal.spectrogram(
+            data, self.sampling_rate)
+
+        self.hist_After.setLevels(np.min(spectrogramPlot),
+                                  np.max(spectrogramPlot))
+        self.img_After.setImage(spectrogramPlot)
+        self.img_After.scale(time[-1]/np.size(spectrogramPlot, axis=1),
+                             np.max(freq)/np.size(spectrogramPlot, axis=0))
+        self.Spectroplot_After.setLimits(
+            xMin=0, xMax=time[-1], yMin=0, yMax=freq[-1])
+        self.Spectroplot_After.setLabel('bottom', "Time")
+        self.Spectroplot_After.setLabel('left', "Frequency",unit='Hz')
+
+    def generatePDF(self, filename):
+        pdf = FPDF()
+        pdf.add_page()
+        pdf.set_font('Arial', 'B', 15)
+        pdf.set_xy(0, 0)
+        for i in range(2):
+            pdf.cell(0, 10, ln=1, align='C')
+            exporter = pg.exporters.ImageExporter(
+                self.graphWidgets[i].plotItem)
+            exporter.parameters()['width'] = 250
+            exporter.parameters()['height'] = 250
+            exporter.export('fileName'+str(i+1)+'.png')
+            pdf.image(('fileName'+str(i+1)+'.png'),
+                      x=None, y=None, w=180, h=70)
+
+        pdf.cell(0, 10, ln=1, align='C')
+        pdf.image('plot.png', x=None, y=None, w=200, h=100)
+
+        pdf.output(filename)
+
+
+    def printPDF(self):
+        # allows the user to save the file and name it as they like
+        filename, _ = QtWidgets.QFileDialog.getSaveFileName(
+            self, "Export PDF", None, "PDF files (.pdf);;All Files()"
+            )
+        if filename:
+            if QtCore.QFileInfo(filename).suffix() == "":
+                    filename += ".pdf"
+        self.generatePDF(filename)
+
+
+    def saveFile(self):
+        # allows the user to save the file and name it as they like
+        filename, _ = QtWidgets.QFileDialog.getSaveFileName(
+            self, "Export WAV", None, "WAV files (.wav);;All Files()"
+            )
+        if filename:
+            if QtCore.QFileInfo(filename).suffix() == "1":
+                    filename += ".wav"
+            self.generate_WavFile(filename)
+        self.printPDF()
 
 if __name__ == "__main__":
     import sys
