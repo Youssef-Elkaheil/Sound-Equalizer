@@ -1,33 +1,20 @@
 from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt5.QtWidgets import QFileDialog
 from PyQt5 import QtMultimedia as M
+from pyqtgraph.widgets.PlotWidget import PlotWidget
+from scipy.fft import rfft, rfftfreq
+from scipy.fft import irfft
 import pyqtgraph as pg
+from scipy import signal
 import RetranslateUI
 import Navigations
 import Resources
 import Equalizer
-import Data
 import sys
 import numpy as np
-from scipy.fft import irfft
-from scipy.fft import rfft, rfftfreq
-# from Stage import Ui_Form
-# from tabs import *
-
-# class TabPage(QtWidgets.QWidget):
-#     def __init__(self, parent=None):
-#         super().__init__(parent)
-#         group = QtWidgets.QGroupBox('Monty Python')
-#         layout = QtWidgets.QVBoxLayout(self)
-#         layout.addWidget(group)
-#         grid = QtWidgets.QGridLayout(group)
-#         grid.addWidget(QtWidgets.QLabel('Enter a name:'), 0, 0)
-#         grid.addWidget(QtWidgets.QLabel('Choose a number:'), 0, 1)
-#         grid.addWidget(QtWidgets.QLineEdit(), 1, 0)
-#         grid.addWidget(QtWidgets.QComboBox(), 1, 1)
-#         grid.addWidget(QtWidgets.QPushButton('Click Me!'), 1, 2)
-#         grid.addWidget(QtWidgets.QSpinBox(), 2, 0)
-#         grid.addWidget(QtWidgets.QPushButton('Clear Text'), 2, 2)
-#         grid.addWidget(QtWidgets.QTextEdit(), 3, 0, 1, 3)
+import pandas as pd
+import librosa
+import os
 
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
@@ -97,6 +84,7 @@ class Ui_MainWindow(object):
         self.Spectrogram_After = pg.GraphicsLayoutWidget(self.tab)
         self.Spectrogram_After.setGeometry(QtCore.QRect(1050, 10, 0, 0))
         self.Spectrogram_After.setObjectName("Spectrogram_After")
+        # PlotWidget(self.Spectrogram_After)
         self.Spectroplot_After = self.Spectrogram_After.addPlot()
 
         self.img_After = pg.ImageItem()
@@ -175,11 +163,7 @@ class Ui_MainWindow(object):
 
         self.tabWidget.addTab(self.tab, "Tab 1")
 
-        self.timer = QtCore.QTimer()
-        self.timer.timeout.connect(lambda : play(self))
-        self.timer.setInterval(10)
-        self.timer.start()
-        self.speed = 1000
+        
 
 
         MainWindow.setCentralWidget(self.centralwidget)
@@ -196,8 +180,6 @@ class Ui_MainWindow(object):
         self.menuZoom.setObjectName("menuZoom")
         self.menuSpeed = QtWidgets.QMenu(self.menuNavigation)
         self.menuSpeed.setObjectName("menuSpeed")
-        self.menuEdit = QtWidgets.QMenu(self.menubar)
-        self.menuEdit.setObjectName("menuEdit")
         self.menuTheme = QtWidgets.QMenu(self.menubar)
         self.menuTheme.setObjectName("menuTheme")
         MainWindow.setMenuBar(self.menubar)
@@ -319,14 +301,12 @@ class Ui_MainWindow(object):
         self.menuNavigation.addAction(self.actionPlay)
         self.menuNavigation.addAction(self.actionSound)
         self.menuNavigation.addAction(self.menuSpeed.menuAction())
-        self.menuEdit.addAction(self.actionSpectrogram)
-        self.menuEdit.addSeparator()
-        self.menuEdit.addAction(self.actionEqualizer)
-        self.menuEdit.addSeparator()
+        self.menuNavigation.addSeparator()
+        self.menuNavigation.addAction(self.actionSpectrogram)
+        self.menuNavigation.addAction(self.actionEqualizer)
         self.menuTheme.addAction(self.actionGraph_theme)
         self.menuTheme.addAction(self.actionSpectrogram_theme)
         self.menubar.addAction(self.menuFile.menuAction())
-        self.menubar.addAction(self.menuEdit.menuAction())
         self.menubar.addAction(self.menuNavigation.menuAction())
         self.menubar.addAction(self.menuTheme.menuAction())
         self.toolBar.addAction(self.actionOpen)
@@ -344,63 +324,131 @@ class Ui_MainWindow(object):
         self.toolBar.addSeparator()
         self.toolBar.addAction(self.actionEqualizer)
         self.toolBar.addAction(self.actionSpectrogram)
+        self.data =[]
+        self.timer = QtCore.QTimer()
+        self.timer.timeout.connect(lambda: Navigations.Update(self))
+        self.timer.setInterval(10)
+        self.timer.start()
+        self.speed = 1000
                                                                         #Methods' Declaration
-        getFile = Data.getFile
+      
         retranslateUi = RetranslateUI.retranslateUi
-        ShowSpectrogram = Data.ShowSpectrogram
-        ShowEqualizer = Equalizer.ShowEqualizer
-        ZoomIn = Navigations.Zoom_in
-        ZoomOut = Navigations.Zoom_out
-        ScrollLeft = Navigations.scroll_left
-        ScrollRight = Navigations.scroll_right
-        play = Navigations.Update
-        SpeedUp = Navigations.SpeedUp
-        SpeedDown =Navigations.SpeedDown
-        Gain=Equalizer.Gain
-
-        # bands=Equalizer.getBands
-        
-
-        
                                                                         #Calling Methods
         retranslateUi(self, MainWindow)
-        self.actionOpen.triggered.connect(lambda : getFile(self))
+        self.actionOpen.triggered.connect(self.getFile)
         self.actionSpectrogram.triggered.connect(
-            lambda : ShowSpectrogram(self,MainWindow))
+            lambda : Navigations.ShowSpectrogram(self,MainWindow))
         self.actionEqualizer.triggered.connect(
-            lambda : ShowEqualizer(self, MainWindow))
-        self.actionZoom_in.triggered.connect(lambda : ZoomIn(self))
-        self.actionZoom_out.triggered.connect(lambda : ZoomOut(self))
-        self.actionLeft.triggered.connect(lambda : ScrollLeft(self))
-        self.actionRight.triggered.connect(lambda : ScrollRight(self))
-        #self.actionPlay.triggered.connect(self.timer.start)
-        self.actionFaster.triggered.connect(lambda : SpeedUp(self))
-        self.actionSlower.triggered.connect(lambda: SpeedDown(self))
+            lambda: Navigations.ShowEqualizer(self, MainWindow))
+        self.actionZoom_in.triggered.connect(lambda : Navigations.Zoom_in(self))
+        self.actionZoom_out.triggered.connect(lambda : Navigations.Zoom_out(self))
+        self.actionLeft.triggered.connect(lambda : Navigations.scroll_left(self))
+        self.actionRight.triggered.connect(lambda : Navigations.scroll_right(self))
+        self.actionPlay.triggered.connect(self.timer.start)
+        self.actionFaster.triggered.connect(lambda : Navigations.SpeedUp(self))
+        self.actionSlower.triggered.connect(lambda : Navigations.SpeedDown(self))
+        
         
         #for i in range(10):
-        self.Slider[0].valueChanged.connect(lambda: Gain(self,0,self.Slider[0].value()))
-        self.Slider[1].valueChanged.connect(
-            lambda: Gain(self,1, self.Slider[1].value()))
-        self.Slider[2].valueChanged.connect(
-            lambda: Gain(self,2, self.Slider[2].value()))
-        self.Slider[3].valueChanged.connect(
-            lambda: Gain(self,3, self.Slider[3].value()))
-        self.Slider[4].valueChanged.connect(
-            lambda: Gain(self,4, self.Slider[4].value()))
-        self.Slider[5].valueChanged.connect(
-                lambda: Gain(self,5, self.Slider[5].value()))
-        self.Slider[6].valueChanged.connect(
-            lambda: Gain(self,6, self.Slider[6].value()))
-        self.Slider[7].valueChanged.connect(
-            lambda: Gain(self,7, self.Slider[7].value()))
-        self.Slider[8].valueChanged.connect(
-            lambda: Gain(self,8, self.Slider[8].value()))
-        self.Slider[9].valueChanged.connect(
-            lambda: Gain(self,9, self.Slider[9].value()))
+        # self.Slider[0].valueChanged.connect(lambda: Gain(self,0,self.Slider[0].value()))
+        # self.Slider[1].valueChanged.connect(
+        #     lambda: Gain(self,1, self.Slider[1].value()))
+        # self.Slider[2].valueChanged.connect(
+        #     lambda: Gain(self,2, self.Slider[2].value()))
+        # self.Slider[3].valueChanged.connect(
+        #     lambda: Gain(self,3, self.Slider[3].value()))
+        # self.Slider[4].valueChanged.connect(
+        #     lambda: Gain(self,4, self.Slider[4].value()))
+        # self.Slider[5].valueChanged.connect(
+        #         lambda: Gain(self,5, self.Slider[5].value()))
+        # self.Slider[6].valueChanged.connect(
+        #     lambda: Gain(self,6, self.Slider[6].value()))
+        # self.Slider[7].valueChanged.connect(
+        #     lambda: Gain(self,7, self.Slider[7].value()))
+        # self.Slider[8].valueChanged.connect(
+        #     lambda: Gain(self,8, self.Slider[8].value()))
+        # self.Slider[9].valueChanged.connect(
+        #     lambda: Gain(self,9, self.Slider[9].value()))
      
         
+    def getFile(self):
+
+        self.filePath = QFileDialog.getOpenFileName(filter="wav (*.wav)")[0]
+        print("File :", self.filePath)
+        self.fileName = os.path.basename(self.filePath)
+        self.data, self.sampling_rate = librosa.load(
+            self.filePath, sr=None, mono=True, offset=0.0, duration=None)
+        self.Time = len(self.data) / self.sampling_rate
+        self.Graph_After.clear()
+        self.Graph_After.setTitle('After', color='w', size='12pt')
+        self.Graph_After.setLabel("left", "Amplitude")
+        self.Graph_After.setLabel("bottom", "Time")
+
+        self.Graph_After.plot(self.data)
+
+        self.Graph_Before.clear()
+        self.Graph_Before.setTitle('Before', color='w', size='12pt')
+        self.Graph_Before.setLabel("left", "Amplitude")
+        self.Graph_Before.setLabel("bottom", "Time")
+
+        self.Graph_Before.plot(self.data)
+        
+        
+        self.Spectrogram(self.data)
+        print(self.data)
+        print(self.sampling_rate)
+        print(len(self.data))
 
 
+    def Spectrogram(self, data):
+
+        self.img_After.clear()
+        self.img_Before.clear()
+        pg.setConfigOptions(imageAxisOrder='row-major')
+
+        freq, time, spectrogramPlot = signal.spectrogram(
+            data, self.sampling_rate)
+            
+        self.hist_Before.setLevels(np.min(spectrogramPlot),
+                                np.max(spectrogramPlot))
+
+        self.img_Before.setImage(spectrogramPlot)
+
+        self.img_Before.scale(time[-1]/np.size(spectrogramPlot, axis=1),
+                            np.max(freq)/np.size(spectrogramPlot, axis=0))
+
+        self.Spectroplot_Before.setLimits(
+            xMin=0, xMax=time[-1], yMin=0, yMax=freq[-1])
+        
+
+        self.hist_After.setLevels(np.min(spectrogramPlot),
+                                np.max(spectrogramPlot))
+        self.img_After.setImage(spectrogramPlot)
+        self.img_After.scale(time[-1]/np.size(spectrogramPlot, axis=1),
+                            np.max(freq)/np.size(spectrogramPlot, axis=0))
+        self.Spectroplot_After.setLimits(
+            xMin=0, xMax=time[-1], yMin=0, yMax=freq[-1])
+        self.Spectroplot_Before.setLabel('bottom', "Time")
+        self.Spectroplot_Before.setLabel('left', "Frequency")
+        self.Spectroplot_After.setLabel('bottom', "Time")
+        self.Spectroplot_After.setLabel('left', "Frequency")
+
+    def Gain(self):
+        self.N = self.sampling_rate * self.data/10000
+        normalized_tone = np.int16((self.data / self.data.max()) * 32767)
+        self.yrfft = rfft(normalized_tone)
+        self.xrfft = rfftfreq(self.N, 1 / self.sampling_rate)
+        self.points_per_freq = int(len(self.xrfft) / (self.sampling_rate / 2))
+        self.BW = int(self.points_per_freq*(self.sampling_rate / 20))
+        self.yrfft[:] = 0
+        #slider *self.BW : (slider+1)*self.BW] *= 0
+        self.yt = irfft(self.yrfft)
+        self.Graph_After.clear()
+        # self.Graph_After.setTitle('After', color='w', size='12pt')
+        # self.Graph_After.setLabel("left", "Amplitude")
+        # self.Graph_After.setLabel("bottom", "Time")
+        # self.Graph_After.plot(self.yt)
+        # write("Result.wav", self.sampling_rate, self.yt)
 
     
 

@@ -12,7 +12,6 @@ def retranslateUi(self, MainWindow):
     self.menuScroll.setTitle(_translate("MainWindow", "Scroll"))
     self.menuZoom.setTitle(_translate("MainWindow", "Zoom"))
     self.menuSpeed.setTitle(_translate("MainWindow", "Speed"))
-    self.menuEdit.setTitle(_translate("MainWindow", "Edit"))
     self.menuTheme.setTitle(_translate("MainWindow", "Theme"))
     self.toolBar.setWindowTitle(_translate("MainWindow", "toolBar"))
     self.actionOpen.setText(_translate("MainWindow", "Open"))
