@@ -8,7 +8,7 @@ def Zoom_in(self):
 
 def Zoom_out(self):
     self.xrange, yrange = self.Graph_After.viewRange()
-    if self.xrange[1]*2 <= len(self.data)+10000:
+    if self.xrange[1]*2 <= len(self.data)+1000:
         self.Graph_After.setXRange(self.xrange[0]*2 , self.xrange[1] * 2, padding=0)
         self.Graph_Before.setXRange(self.xrange[0]*2 , self.xrange[1] * 2, padding=0)
     else:
@@ -33,17 +33,17 @@ def scroll_left(self):
 
 
 def Update(self):
-    xrange, yrange = self.Graph_After.viewRange()
+    self.xrange, yrange = self.Graph_After.viewRange()
     if len(self.data) > 0 and self.actionPlay.isChecked():
         self.Graph_After.setXRange(
-            xrange[0]+self.speed, xrange[1] + self.speed, padding=0)
-        self.Graph_After.setXRange(
-            xrange[0]+self.speed, xrange[1] + self.speed, padding=0)
-    if xrange[1] > len(self.data)-100 or xrange[0] <0:
+            self.xrange[0]+self.speed, self.xrange[1] + self.speed, padding=0)
+        self.Graph_Before.setXRange(
+            self.xrange[0]+self.speed, self.xrange[1] + self.speed, padding=0)
+    if self.xrange[1] > len(self.data)-1000 or self.xrange[0] <-100:
         self.timer.stop()
 
 def SpeedUp(self):
-    if self.speed < 10000:
+    if self.speed < 1000:
         self.speed +=100
 
 

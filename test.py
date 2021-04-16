@@ -3,6 +3,7 @@ from scipy.fft import rfft, rfftfreq
 from scipy.io.wavfile import write
 from matplotlib import pyplot as plt
 import numpy as np
+
 SAMPLE_RATE = 44100  # Hertz
 DURATION = 5  # Seconds
 
@@ -44,7 +45,7 @@ N = SAMPLE_RATE * DURATION
 print(SAMPLE_RATE , DURATION)
 
 # Note the extra 'r' at the front
-yrf = rfft(normalized_tone)
+yrf = rfft(mixed_tone)
 xrf = rfftfreq(N, 1 / SAMPLE_RATE)
 #print(yrf)
 #print(xrf)

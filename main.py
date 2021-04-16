@@ -1,16 +1,15 @@
 from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt5 import QtMultimedia as M
 import pyqtgraph as pg
 import RetranslateUI
-import Spectrogram
 import Navigations
 import Resources
 import Equalizer
 import Data
+import sys
 import numpy as np
 from scipy.fft import irfft
 from scipy.fft import rfft, rfftfreq
-from PyQt5 import QtMultimedia as M
-import sys
 # from Stage import Ui_Form
 # from tabs import *
 
@@ -348,7 +347,7 @@ class Ui_MainWindow(object):
                                                                         #Methods' Declaration
         getFile = Data.getFile
         retranslateUi = RetranslateUI.retranslateUi
-        ShowSpectrogram = Spectrogram.ShowSpectrogram
+        ShowSpectrogram = Data.ShowSpectrogram
         ShowEqualizer = Equalizer.ShowEqualizer
         ZoomIn = Navigations.Zoom_in
         ZoomOut = Navigations.Zoom_out
@@ -374,44 +373,36 @@ class Ui_MainWindow(object):
         self.actionZoom_out.triggered.connect(lambda : ZoomOut(self))
         self.actionLeft.triggered.connect(lambda : ScrollLeft(self))
         self.actionRight.triggered.connect(lambda : ScrollRight(self))
-        self.actionPlay.triggered.connect(self.timer.start)
+        #self.actionPlay.triggered.connect(self.timer.start)
         self.actionFaster.triggered.connect(lambda : SpeedUp(self))
         self.actionSlower.triggered.connect(lambda: SpeedDown(self))
-        for i in range(10):
-            self.Slider[i].valueChanged.connect(lambda: Gain(i,self.Slider[i].value()))
-        # self.Slider[1].valueChanged.connect(
-        #     lambda: self.Gain(1, self.Slider[1].value()))
-        # self.Slider[2].valueChanged.connect(
-        #     lambda: self.Gain(2, self.Slider[2].value()))
-        # self.Slider[3].valueChanged.connect(
-        #     lambda: self.Gain(3, self.Slider[3].value()))
-        # self.Slider[4].valueChanged.connect(
-        #     lambda: self.Gain(4, self.Slider[4].value()))
-        # self.Slider[5].valueChanged.connect(
-        #         lambda: self.Gain(5, self.Slider[5].value()))
-        # self.Slider[6].valueChanged.connect(
-        #     lambda: self.Gain(6, self.Slider[6].value()))
-        # self.Slider[7].valueChanged.connect(
-        #     lambda: self.Gain(7, self.Slider[7].value()))
-        # self.Slider[8].valueChanged.connect(
-        #     lambda: self.Gain(8, self.Slider[8].value()))
-        # self.Slider[9].valueChanged.connect(
-        #     lambda: self.Gain(9, self.Slider[9].value()))
-        #self.actionSave.triggered.connect(self.Gain)
+        
+        #for i in range(10):
+        self.Slider[0].valueChanged.connect(lambda: Gain(self,0,self.Slider[0].value()))
+        self.Slider[1].valueChanged.connect(
+            lambda: Gain(self,1, self.Slider[1].value()))
+        self.Slider[2].valueChanged.connect(
+            lambda: Gain(self,2, self.Slider[2].value()))
+        self.Slider[3].valueChanged.connect(
+            lambda: Gain(self,3, self.Slider[3].value()))
+        self.Slider[4].valueChanged.connect(
+            lambda: Gain(self,4, self.Slider[4].value()))
+        self.Slider[5].valueChanged.connect(
+                lambda: Gain(self,5, self.Slider[5].value()))
+        self.Slider[6].valueChanged.connect(
+            lambda: Gain(self,6, self.Slider[6].value()))
+        self.Slider[7].valueChanged.connect(
+            lambda: Gain(self,7, self.Slider[7].value()))
+        self.Slider[8].valueChanged.connect(
+            lambda: Gain(self,8, self.Slider[8].value()))
+        self.Slider[9].valueChanged.connect(
+            lambda: Gain(self,9, self.Slider[9].value()))
+     
         
 
-        
 
 
-        
- 
-   
-    # def sound(self):
-    #     self.player.play()
-    # def pause(self):
-    #     self.player.pause()    
-
-
+    
 
 if __name__ == "__main__":
     import sys
