@@ -11,7 +11,9 @@ import sys
 import numpy as np
 import librosa
 import os
+import sounddevice as sd
 from fpdf import FPDF
+from scipy.io.wavfile import write
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
@@ -118,7 +120,7 @@ class Ui_MainWindow(object):
                 self.SpectroSlider[i].sizePolicy().hasHeightForWidth())
             self.SpectroSlider[i].setSizePolicy(sizePolicy)
             self.SpectroSlider[i].setMaximum(10)
-            self.SpectroSlider[i].setMinimum(1)
+            self.SpectroSlider[i].setMinimum(0)
             self.SpectroSlider[i].setSliderPosition(10-10*i)
             self.SpectroSlider[i].setOrientation(QtCore.Qt.Horizontal)
             self.SpectroSlider[i].setInvertedControls(False)
@@ -335,12 +337,16 @@ class Ui_MainWindow(object):
         self.actionFaster.triggered.connect(lambda : Navigations.SpeedUp(self))
         self.actionSlower.triggered.connect(lambda : Navigations.SpeedDown(self))
         self.actionSave.triggered.connect(self.saveFile)
-        
+        self.actionSound.triggered.connect(self.play_audio)
         for i in range(10):
-            self.Slider[i].valueChanged.connect(lambda: self.fft())
+            self.Slider[i].valueChanged.connect(self.fft)
+        for i in range(2):
+            self.SpectroSlider[i].valueChanged.connect(self.colorchange)
+        self.tabWidget.addTab(self.tab, "New")
      
         
     def getFile(self):
+
         self.filePath = QFileDialog.getOpenFileName(filter="wav (*.wav)")[0]
         print("File :", self.filePath)
         self.fileName = os.path.basename(self.filePath)
@@ -359,42 +365,36 @@ class Ui_MainWindow(object):
         self.Graph_Before.setTitle('Before', color='w', size='12pt')
         self.Graph_Before.setLabel("left", "Amplitude")
         self.Graph_Before.setLabel("bottom", "Time")
-
         self.Graph_Before.plot(self.data)
-        
-        
+        self.fft()
         self.Spectrogram(self.data)
-        print(self.data)
-        print(self.sampling_rate)
-        print(len(self.data))
-
 
     def Spectrogram(self, data):
+
         pg.setConfigOptions(imageAxisOrder='row-major')
-
-        freq, time, Spectrodata = signal.spectrogram(self.data, self.sampling_rate)
-        img =[]
-        hist =[]
+        freq, time, Spectrodata = signal.spectrogram(data, self.sampling_rate)
+        self.img =[]
+        self.hist =[]
+        smax = self.SpectroSlider[0].value()
+        smin = self.SpectroSlider[1].value()
         for i in range(2):
-            img.append(pg.ImageItem())
-            self.Spectrogram_After.addItem(img[0])
+            self.img.append(pg.ImageItem())
+            self.hist.append(pg.HistogramLUTItem())
+            self.img[i].setImage(Spectrodata)
+            self.img[i].scale(time[-1]/np.size(Spectrodata, axis=1), freq[-1]/np.size(Spectrodata, axis=0))
+            self.hist[i].setImageItem(self.img[i])
+            self.hist[i].setLevels(min=np.min(Spectrodata), max=np.max(Spectrodata))
 
-            hist.append(pg.HistogramLUTItem())
-
-            hist[i].setImageItem(img[i])
-            hist[i].setLevels(min=np.min(Spectrodata), max=np.max(Spectrodata))
-
-            hist[i].gradient.restoreState(
+            self.hist[i].gradient.restoreState(
                     {'mode': 'rgb',
-                        'ticks': [(0.5, (0, 182, 188, 255)),
-                                (1.0, (246, 111, 0, 255)),
-                                (0.0, (75, 0, 113, 255))]})
-            img[i].setImage(Spectrodata)
+                        'ticks': [
+                            (1.0, (25*smax, 0, 110 - 11*smax, 255)),
+                            (0.0, (25*smin, 0, 110-11*smin, 255))]})
+            
 
-            img[i].scale(time[-1]/np.size(Spectrodata, axis=1), freq[-1]/np.size(Spectrodata, axis=0))
 
-        self.Spectrogram_After.addItem(img[0])
-        self.Spectrogram_Before.addItem(img[1])
+        self.Spectrogram_After.addItem(self.img[0])
+        self.Spectrogram_Before.addItem(self.img[1])
 
         self.Spectrogram_After.setLimits(
             xMin=time[0], xMax=time[-1], yMin=freq[0], yMax=freq[-1])
@@ -416,11 +416,13 @@ class Ui_MainWindow(object):
         self.N = self.sampling_rate * len(self.data)/10000
         self.yrfft = rfft(self.data)
         self.xrfft = rfftfreq(int(self.N), 1.0 / self.sampling_rate)
-
+        sumofgain =0
         self.BW = int(len(self.yrfft)/10)
         for i in range (10):
             self.yrfft[i*self.BW : (i+1)*self.BW]*=self.Slider[i].value()
-
+            sumofgain += self.Slider[i].value()
+        if sumofgain == 0:
+            self.yrfft[:] =0
         self.yt = irfft(self.yrfft)
         self.Graph_After.clear()
         self.Graph_After.setTitle('After', color='w', size='12pt')
@@ -442,7 +444,8 @@ class Ui_MainWindow(object):
         freq, time, Spectrodata = signal.spectrogram(
             data, self.sampling_rate)
     
-    
+        smax = self.SpectroSlider[0].value()
+        smin = self.SpectroSlider[1].value()
         img = pg.ImageItem()
         self.Spectrogram_After.addItem(img)
 
@@ -453,9 +456,9 @@ class Ui_MainWindow(object):
 
         hist.gradient.restoreState(
             {'mode': 'rgb',
-                'ticks': [(0.5, (0, 182, 188, 255)),
-                        (1.0, (246, 111, 0, 255)),
-                        (0.0, (75, 0, 113, 255))]})
+                'ticks': [
+                        (1.0, (25*smax,0,110- 11*smax, 255)),
+                        (0.0, (25*smin,0, 110-11*smin, 255))]})
         img.setImage(Spectrodata)
 
         img.scale(time[-1]/np.size(Spectrodata, axis=1),
@@ -467,9 +470,16 @@ class Ui_MainWindow(object):
         self.Spectrogram_After.setYRange(np.min(freq), np.max(freq)-100)
         self.Spectrogram_After.setLabel('bottom', "Time", units='s')
         self.Spectrogram_After.setLabel('left', "Frequency", units='Hz')
+        self.Spectrogram_After.setLabel('right', "Frequency", units='Hz')
         self.Spectrogram_After.plotItem.setTitle("After")
 
-        
+    def play_audio(self):
+        if self.actionSound.isChecked():
+            sd.play(np.real(self.yt) / np.max(np.real(self.yt)),
+                    self.sampling_rate)
+        else:
+            sd.stop(self.data)
+
 
     def generatePDF(self, filename):
         pdf = FPDF()
@@ -512,6 +522,10 @@ class Ui_MainWindow(object):
                     filename += ".wav"
             self.generate_WavFile(filename)
         self.printPDF()
+    
+    def colorchange(self):
+        self.Spectrogram(self.data)
+        self.updateSpectrogram(np.real(self.yt))
 
 if __name__ == "__main__":
     import sys
