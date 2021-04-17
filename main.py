@@ -47,8 +47,8 @@ class Ui_MainWindow(object):
         self.tabWidget.setIconSize(QtCore.QSize(32, 32))
         self.tabWidget.setElideMode(QtCore.Qt.ElideLeft)
         #self.tabWidget.setDocumentMode(False)
-        self.tabWidget.setTabsClosable(True)
-        self.tabWidget.setMovable(True)
+        # self.tabWidget.setTabsClosable(True)
+        # self.tabWidget.setMovable(True)
         #self.tabWidget.setTabBarAutoHide(True)
         self.tabWidget.setObjectName("tabWidget")
         self.tab = QtWidgets.QWidget()
@@ -58,43 +58,15 @@ class Ui_MainWindow(object):
         self.Graph_Before.setObjectName("Graph_Before")
         self.Graph_Before.setTitle("Before")
 
-        self.Spectrogram_Before = pg.GraphicsLayoutWidget(self.tab)
+        self.Spectrogram_Before = pg.PlotWidget(self.tab)
         self.Spectrogram_Before.setGeometry(QtCore.QRect(1050, 520, 0, 0))
         self.Spectrogram_Before.setObjectName("Spectrogram_Before")
-        self.Spectroplot_Before = self.Spectrogram_Before.addPlot()
 
-        self.img_Before = pg.ImageItem()
-        self.Spectroplot_Before.addItem(self.img_Before)
-        self.hist_Before = pg.HistogramLUTItem()
-        self.hist_Before.setImageItem(self.img_Before)
-
-        self.Spectrogram_Before.addItem(self.hist_Before)
-        self.Spectrogram_Before.show()
-        self.hist_Before.gradient.restoreState(
-            {'mode': 'rgb',
-                'ticks': [(0.5, (0, 182, 188, 255)),
-                          (1.0, (246, 111, 0, 255)),
-                          (0.0, (75, 0, 113, 255))]})
-
-
-        self.Spectrogram_After = pg.GraphicsLayoutWidget(self.tab)
+        self.Spectrogram_After = pg.PlotWidget(self.tab)
         self.Spectrogram_After.setGeometry(QtCore.QRect(1050, 10, 0, 0))
         self.Spectrogram_After.setObjectName("Spectrogram_After")
-        # PlotWidget(self.Spectrogram_After)
-        self.Spectroplot_After = self.Spectrogram_After.addPlot()
 
-        self.img_After = pg.ImageItem()
-        self.Spectroplot_After.addItem(self.img_After)
-        self.hist_After = pg.HistogramLUTItem()
-        self.hist_After.setImageItem(self.img_After)
-        
-        self.Spectrogram_After.addItem(self.hist_After)
-        self.Spectrogram_After.show()
-        self.hist_After.gradient.restoreState(
-            {'mode': 'rgb',
-                'ticks': [(0.5, (0, 182, 188, 255)),
-                          (1.0, (246, 111, 0, 255)),
-                          (0.0, (75, 0, 113, 255))]})
+
 
         self.Graph_After = pg.PlotWidget(self.tab)
         self.Graph_After.setGeometry(QtCore.QRect(50, 10, 961, 271))
@@ -139,6 +111,25 @@ class Ui_MainWindow(object):
             self.Slider[i].setObjectName("Slider_{}".format(i+1))
             self.horizontalLayout.addWidget(self.Slider[i])
 
+        self.SpectroSlider =[]
+        for i in range(2):
+            self.SpectroSlider.append(QtWidgets.QSlider(self.tab))
+            sizePolicy.setHeightForWidth(
+                self.SpectroSlider[i].sizePolicy().hasHeightForWidth())
+            self.SpectroSlider[i].setSizePolicy(sizePolicy)
+            self.SpectroSlider[i].setMaximum(10)
+            self.SpectroSlider[i].setMinimum(1)
+            self.SpectroSlider[i].setSliderPosition(10-10*i)
+            self.SpectroSlider[i].setOrientation(QtCore.Qt.Horizontal)
+            self.SpectroSlider[i].setInvertedControls(False)
+            self.SpectroSlider[i].setTickPosition(
+                QtWidgets.QSlider.TicksBothSides)
+            self.SpectroSlider[i].setTickInterval(1)
+            self.SpectroSlider[i].setGeometry(QtCore.QRect(1075,375+i*50,380,35))
+            self.SpectroSlider[i].setObjectName("scpectoSlider_{}".format(i+1))
+        
+
+
         self.layoutWidget_2 = QtWidgets.QWidget(self.frame)
         self.layoutWidget_2.setGeometry(QtCore.QRect(0, 180, 961, 31))
         self.layoutWidget_2.setObjectName("layoutWidget_2")
@@ -157,7 +148,7 @@ class Ui_MainWindow(object):
             self.label[i].setObjectName("label_{}".format(i+1))
             self.horizontalLayout_2.addWidget(self.label[i])
 
-        self.tabWidget.addTab(self.tab, "Tab 1")
+        
 
         
 
@@ -350,10 +341,10 @@ class Ui_MainWindow(object):
      
         
     def getFile(self):
-
         self.filePath = QFileDialog.getOpenFileName(filter="wav (*.wav)")[0]
         print("File :", self.filePath)
         self.fileName = os.path.basename(self.filePath)
+        self.tabWidget.addTab(self.tab, self.fileName)
         self.data, self.sampling_rate = librosa.load(
             self.filePath, sr=None, mono=True, offset=0.0, duration=None)
         self.Time = len(self.data) / self.sampling_rate
@@ -379,74 +370,106 @@ class Ui_MainWindow(object):
 
 
     def Spectrogram(self, data):
-
         pg.setConfigOptions(imageAxisOrder='row-major')
-        freq, time, spectrogramPlot = signal.spectrogram(
-            data, self.sampling_rate)
-            
-        self.hist_Before.setLevels(np.min(spectrogramPlot),
-                                np.max(spectrogramPlot))
 
-        self.img_Before.setImage(spectrogramPlot)
+        freq, time, Spectrodata = signal.spectrogram(self.data, self.sampling_rate)
+        img =[]
+        hist =[]
+        for i in range(2):
+            img.append(pg.ImageItem())
+            self.Spectrogram_After.addItem(img[0])
 
-        self.img_Before.scale(time[-1]/np.size(spectrogramPlot, axis=1),
-                            np.max(freq)/np.size(spectrogramPlot, axis=0))
+            hist.append(pg.HistogramLUTItem())
 
-        self.Spectroplot_Before.setLimits(
-            xMin=0, xMax=time[-1], yMin=0, yMax=freq[-1])
-        
+            hist[i].setImageItem(img[i])
+            hist[i].setLevels(min=np.min(Spectrodata), max=np.max(Spectrodata))
 
-        self.hist_After.setLevels(np.min(spectrogramPlot),
-                                np.max(spectrogramPlot))
-        self.img_After.setImage(spectrogramPlot)
-        self.img_After.scale(time[-1]/np.size(spectrogramPlot, axis=1),
-                            np.max(freq)/np.size(spectrogramPlot, axis=0))
-        self.Spectroplot_After.setLimits(
-            xMin=0, xMax=time[-1], yMin=0, yMax=freq[-1])
-        self.Spectroplot_Before.setLabel('bottom', "Time")
-        self.Spectroplot_Before.setLabel('left', "Frequency")
-        self.Spectroplot_After.setLabel('bottom', "Time")
-        self.Spectroplot_After.setLabel('left', "Frequency")
+            hist[i].gradient.restoreState(
+                    {'mode': 'rgb',
+                        'ticks': [(0.5, (0, 182, 188, 255)),
+                                (1.0, (246, 111, 0, 255)),
+                                (0.0, (75, 0, 113, 255))]})
+            img[i].setImage(Spectrodata)
+
+            img[i].scale(time[-1]/np.size(Spectrodata, axis=1), freq[-1]/np.size(Spectrodata, axis=0))
+
+        self.Spectrogram_After.addItem(img[0])
+        self.Spectrogram_Before.addItem(img[1])
+
+        self.Spectrogram_After.setLimits(
+            xMin=time[0], xMax=time[-1], yMin=freq[0], yMax=freq[-1])
+        self.Spectrogram_After.setYRange(np.min(freq), np.max(freq))
+        self.Spectrogram_After.setLabel('bottom', "Time", units='s')
+        self.Spectrogram_After.setLabel('left', "Frequency", units='Hz')
+        self.Spectrogram_After.setLabel('right',"Frequency", units='Hz')
+        self.Spectrogram_After.plotItem.setTitle("After")
+
+        self.Spectrogram_Before.setLimits(
+            xMin=time[0], xMax=time[-1], yMin=freq[0], yMax=freq[-1])
+        self.Spectrogram_Before.setYRange(np.min(freq), np.max(freq))
+        self.Spectrogram_Before.setLabel('bottom', "Time", units='s')
+        self.Spectrogram_Before.setLabel('left', "Frequency", units='Hz')
+        self.Spectrogram_Before.setLabel('right',"Frequency", units='Hz')
+        self.Spectrogram_Before.plotItem.setTitle("Before")
 
     def fft(self):
         self.N = self.sampling_rate * len(self.data)/10000
         self.yrfft = rfft(self.data)
         self.xrfft = rfftfreq(int(self.N), 1.0 / self.sampling_rate)
-        print(self.yrfft)
-        print(len(self.yrfft))
-        print(self.xrfft)
-        print(len(self.xrfft))
+
         self.BW = int(len(self.yrfft)/10)
         for i in range (10):
             self.yrfft[i*self.BW : (i+1)*self.BW]*=self.Slider[i].value()
-            
 
-        # self.yrfft *= self.Slider[0].value()
         self.yt = irfft(self.yrfft)
         self.Graph_After.clear()
         self.Graph_After.setTitle('After', color='w', size='12pt')
         self.Graph_After.setLabel("left", "Amplitude")
         self.Graph_After.setLabel("bottom", "Time")
-        self.Graph_After.setYRange(-5,5)
+        self.Graph_After.setYRange(-max(np.real(self.yt)
+                                        ), max(np.real(self.yt)))
+        self.Graph_Before.setYRange(-max(np.real(self.yt)
+                                         ), max(np.real(self.yt)))
         self.Graph_After.plot(np.real(self.yt))
         self.updateSpectrogram(np.real(self.yt))
         # write("Result.wav", self.sampling_rate, self.yt)
 
     def updateSpectrogram(self,data):
-        self.img_After.clear()
+        self.Spectrogram_After.clear()
 
-        freq, time, spectrogramPlot = signal.spectrogram(
+        pg.setConfigOptions(imageAxisOrder='row-major')
+
+        freq, time, Spectrodata = signal.spectrogram(
             data, self.sampling_rate)
+    
+    
+        img = pg.ImageItem()
+        self.Spectrogram_After.addItem(img)
 
-        self.hist_After.setLevels(np.min(spectrogramPlot),
-                                  np.max(spectrogramPlot))
-        self.img_After.setImage(spectrogramPlot)
-        self.img_After.scale(time[-1]/np.size(spectrogramPlot, axis=1),
-                             np.max(freq)/np.size(spectrogramPlot, axis=0))
-        self.Spectroplot_After.setLimits(
-            xMin=0, xMax=time[-1], yMin=0, yMax=freq[-1])
-        self.Spectroplot_After.setLabel('bottom', "Time")
-        self.Spectroplot_After.setLabel('left', "Frequency",unit='Hz')
+        hist = pg.HistogramLUTItem()
+
+        hist.setImageItem(img)
+        hist.setLevels(min=np.min(Spectrodata), max=np.max(Spectrodata))
+
+        hist.gradient.restoreState(
+            {'mode': 'rgb',
+                'ticks': [(0.5, (0, 182, 188, 255)),
+                        (1.0, (246, 111, 0, 255)),
+                        (0.0, (75, 0, 113, 255))]})
+        img.setImage(Spectrodata)
+
+        img.scale(time[-1]/np.size(Spectrodata, axis=1),
+                        freq[-1]/np.size(Spectrodata, axis=0))
+
+        self.Spectrogram_After.addItem(img)
+        self.Spectrogram_After.setLimits(
+            xMin=time[0], xMax=time[-1], yMin=freq[0], yMax=freq[-1])
+        self.Spectrogram_After.setYRange(np.min(freq), np.max(freq)-100)
+        self.Spectrogram_After.setLabel('bottom', "Time", units='s')
+        self.Spectrogram_After.setLabel('left', "Frequency", units='Hz')
+        self.Spectrogram_After.plotItem.setTitle("After")
+
+        
 
     def generatePDF(self, filename):
         pdf = FPDF()
@@ -465,7 +488,6 @@ class Ui_MainWindow(object):
 
         pdf.cell(0, 10, ln=1, align='C')
         pdf.image('plot.png', x=None, y=None, w=200, h=100)
-
         pdf.output(filename)
 
 

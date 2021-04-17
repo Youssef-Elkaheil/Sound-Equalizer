@@ -5,8 +5,8 @@ def retranslateUi(self, MainWindow):
     for i in range(10):
         self.label[i].setText(_translate("MainWindow", "{}/10".format(i+1)))
         
-    self.tabWidget.setTabText(self.tabWidget.indexOf(
-        self.tab), _translate("MainWindow", "Tab 1"))
+    # self.tabWidget.setTabText(self.tabWidget.indexOf(
+    #     self.tab), _translate("MainWindow", "Tab 1"))
     self.menuFile.setTitle(_translate("MainWindow", "File"))
     self.menuNavigation.setTitle(_translate("MainWindow", "Navigation"))
     self.menuScroll.setTitle(_translate("MainWindow", "Scroll"))
