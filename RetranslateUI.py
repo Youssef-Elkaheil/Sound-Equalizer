@@ -16,6 +16,8 @@ def retranslateUi(self, MainWindow):
     self.toolBar.setWindowTitle(_translate("MainWindow", "toolBar"))
     self.actionOpen.setText(_translate("MainWindow", "Open"))
     self.actionOpen.setShortcut(_translate("MainWindow", "Ctrl+O"))
+    self.actionNew.setText(_translate("MainWindow", "New"))
+    self.actionNew.setShortcut(_translate("MainWindow", "Ctrl+N"))
     self.actionSave.setText(_translate("MainWindow", "Save"))
     self.actionSave.setShortcut(_translate("MainWindow", "Ctrl+S"))
     self.actionTab.setText(_translate("MainWindow", "Tab"))

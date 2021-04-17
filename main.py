@@ -13,7 +13,24 @@ import librosa
 import os
 import sounddevice as sd
 from fpdf import FPDF
-from scipy.io.wavfile import write
+from scipy.io import wavfile
+from pyqtgraph import exporters
+
+
+class ApplicationWindow(QtWidgets.QMainWindow):
+    def __init__(self):
+        super(ApplicationWindow, self).__init__()
+        self.ui = Ui_MainWindow()
+        self.ui.setupUi(self)
+        self.children = []
+        self.ui.actionNew.triggered.connect(self.show_child)
+
+    def show_child(self):
+        child = ApplicationWindow()
+        child.show()
+        self.children.append(child)
+
+
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
@@ -185,6 +202,10 @@ class Ui_MainWindow(object):
                         QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self.actionOpen.setIcon(icon1)
         self.actionOpen.setObjectName("actionOpen")
+
+        self.actionNew = QtWidgets.QAction(MainWindow)
+        self.actionNew.setObjectName("actionNew")
+
         self.actionSave = QtWidgets.QAction(MainWindow)
         icon2 = QtGui.QIcon()
         icon2.addPixmap(QtGui.QPixmap(":/Resources/images/save.png"),
@@ -273,9 +294,11 @@ class Ui_MainWindow(object):
         self.actionSpectrogram_theme.setObjectName("actionSpectrogram_theme")
         self.menuFile.addAction(self.actionOpen)
         self.menuFile.addSeparator()
+        self.menuFile.addAction(self.actionNew)
+        self.menuFile.addSeparator()
         self.menuFile.addAction(self.actionSave)
         self.menuFile.addSeparator()
-        self.menuFile.addAction(self.actionClose_Tab)
+        # self.menuFile.addAction(self.actionClose_Tab)
         self.menuFile.addAction(self.actionExit)
         self.menuScroll.addAction(self.actionLeft)
         self.menuScroll.addAction(self.actionRight)
@@ -343,8 +366,7 @@ class Ui_MainWindow(object):
         for i in range(2):
             self.SpectroSlider[i].valueChanged.connect(self.colorchange)
         self.tabWidget.addTab(self.tab, "New")
-     
-        
+
     def getFile(self):
 
         self.filePath = QFileDialog.getOpenFileName(filter="wav (*.wav)")[0]
@@ -480,58 +502,67 @@ class Ui_MainWindow(object):
         else:
             sd.stop(self.data)
 
+    def saveFile(self):
+        # allows the user to save the file and name it as they like
+        if len(self.data) >0:
+            filename, _ = QtWidgets.QFileDialog.getSaveFileName(
+                None, "WAV files (.wav)")
+            name = filename
+            if filename:
+                if QtCore.QFileInfo(filename).suffix() == "":
+                    filename += ".wav"
+                self.generate_WavFile(filename)
+                self.PDF_Report(name)
 
-    def generatePDF(self, filename):
+    def generate_WavFile(self, filename):
+        maximum = np.max(np.abs(self.yt))
+        data = (self.yt / maximum).astype(np.float32)
+        wavfile.write(filename, int(self.sampling_rate), data)
+        
+
+    def PDF_Report(self,filename):
         pdf = FPDF()
         pdf.add_page()
         pdf.set_font('Arial', 'B', 15)
         pdf.set_xy(0, 0)
-        for i in range(2):
-            pdf.cell(0, 10, ln=1, align='C')
-            exporter = pg.exporters.ImageExporter(
-                self.graphWidgets[i].plotItem)
-            exporter.parameters()['width'] = 250
-            exporter.parameters()['height'] = 250
-            exporter.export('fileName'+str(i+1)+'.png')
-            pdf.image(('fileName'+str(i+1)+'.png'),
-                      x=None, y=None, w=180, h=70)
 
-        pdf.cell(0, 10, ln=1, align='C')
-        pdf.image('plot.png', x=None, y=None, w=200, h=100)
-        pdf.output(filename)
+        pdf.cell(0, 10, 'Graph After', ln=1, align='C')
+        exporter = exporters.ImageExporter(self.Graph_After.plotItem)
+        exporter.parameters()['width'] = 500
+        exporter.parameters()['height'] = 250
+        exporter.export('GraphAfter.png')
+        pdf.image('GraphAfter.png', x=None, y=None, w=180, h=50)
 
+        pdf.cell(0, 10, 'spectrogram After', ln=1, align='C')
 
-    def printPDF(self):
-        # allows the user to save the file and name it as they like
-        filename, _ = QtWidgets.QFileDialog.getSaveFileName(
-            self, "Export PDF", None, "PDF files (.pdf);;All Files()"
-            )
-        if filename:
-            if QtCore.QFileInfo(filename).suffix() == "":
-                    filename += ".pdf"
-        self.generatePDF(filename)
+        exporter = exporters.ImageExporter(self.Spectrogram_After.plotItem)
+        exporter.parameters()['width'] = 500
+        exporter.parameters()['height'] = 250
+        exporter.export('SpectroAfter.png')
+        pdf.image('SpectroAfter.png', x=None, y=None, w=180, h=50)
 
+        pdf.cell(0, 10, 'Graph Before', ln=1, align='C')
+        exporter = exporters.ImageExporter(self.Graph_Before.plotItem)
+        exporter.parameters()['width'] = 500
+        exporter.parameters()['height'] = 250
+        exporter.export('GraphBefore.png')
+        pdf.image('GraphBefore.png', x=None, y=None, w=180, h=50)
 
-    def saveFile(self):
-        # allows the user to save the file and name it as they like
-        filename, _ = QtWidgets.QFileDialog.getSaveFileName(
-            self, "Export WAV", None, "WAV files (.wav);;All Files()"
-            )
-        if filename:
-            if QtCore.QFileInfo(filename).suffix() == "1":
-                    filename += ".wav"
-            self.generate_WavFile(filename)
-        self.printPDF()
-    
+        pdf.cell(0, 10, 'Spectrogram Before', ln=1, align='C')
+        exporter = pg.exporters.ImageExporter(self.Spectrogram_Before.plotItem)
+        exporter.parameters()['width'] = 500
+        exporter.parameters()['height'] = 250
+        exporter.export('SpectroBefore.png')
+        pdf.image('SpectroBefore.png', x=None, y=None, w=180, h=50)
+
+        pdf.output(filename.replace('.wav' ,'.pdf'))
+
     def colorchange(self):
         self.Spectrogram(self.data)
         self.updateSpectrogram(np.real(self.yt))
 
-if __name__ == "__main__":
-    import sys
-    app = QtWidgets.QApplication(sys.argv)
-    MainWindow = QtWidgets.QMainWindow()
-    ui = Ui_MainWindow()
-    ui.setupUi(MainWindow)
-    MainWindow.show()
-    sys.exit(app.exec_())
+
+app = QtWidgets.QApplication(sys.argv)
+application = ApplicationWindow()
+application.show()
+app.exec_()
