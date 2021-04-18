@@ -14,7 +14,7 @@ def generatingSignal():
     if __name__ == '__main__':
 
         data_size = 100000
-        fname = "test.wav"
+        fname = "test1.wav"
         frate = 11025.0
         amp = 64000.0
         nchannels = 1
@@ -28,7 +28,7 @@ def generatingSignal():
         itr = 0
     for x in range(data_size):
         if x > itr:
-            itr += 200
+            itr += 400
             freq += 20
         sine_list.append(math.sin(2 * math.pi * freq * (x / frate)))
     wav_file = wave.open(fname, 'w')
@@ -37,7 +37,7 @@ def generatingSignal():
     for v in sine_list:
         wav_file.writeframes(struct.pack('h', int(v * amp / 2)))
     wav_file.close()
-    s_rate, signal = wavfile.read("mysinewave.wav") 
+    s_rate, signal = wavfile.read("test.wav") 
     print(s_rate , signal)
     FFT = abs(fft(signal))
     freqs = fftpk.fftfreq(len(FFT), (1.0/s_rate))
