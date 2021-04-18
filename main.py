@@ -386,7 +386,7 @@ class Ui_MainWindow(object):
         self.actiontheme[1].triggered.connect(lambda: self.theme(2))
         self.actiontheme[2].triggered.connect(lambda: self.theme(3))
         for i in range(10):
-            self.Slider[i].valueChanged.connect(lambda : self.fft(self.data))
+            self.Slider[i].valueChanged.connect(lambda : self.Gain(self.data))
         for i in range(2):
             self.SpectroSlider[i].valueChanged.connect(self.colorchange)
         
@@ -418,15 +418,15 @@ class Ui_MainWindow(object):
             self.Pallete0 = (0, 0, 255,255)
             self.Pallete0_5 = (150, 110, 75,255)
             self.Pallete1 = (255, 0, 0,255)
-
+        yt = self.fft(self.data)
         self.Spectrogram(self.signalData)
-        self.updateSpectrogram(np.real(self.yt))
+        self.updateSpectrogram(yt)
 
     def colorchange(self):
-        self.result = self.yt.copy()
-        
+        self.result = self.data.copy()
+        yt = self.fft(self.data)
         self.Spectrogram(self.signalData)
-        self.updateSpectrogram(np.real(self.result))
+        self.updateSpectrogram(yt)
     
     def getFile(self):
         if self.open ==0:
@@ -450,13 +450,36 @@ class Ui_MainWindow(object):
                 for i in range(len(self.signalData)):
                     self.data.append(self.signalData[i])
             self.time = np.arange(0,self.duration,1/self.samplingfrequency)
-            self.fft(self.data)
-            self.plotAfter(np.real(self.yt))
-            self.plotBefore(np.real(self.yt))
+            intial_plot = self.fft(self.data)
+            self.plotAfter(intial_plot)
+            self.plotBefore(intial_plot)
             self.Spectrogram(self.signalData)
+            self.updateSpectrogram(self.signalData)
             self.open = 1
         else:
             self.show_child()
+
+    def Gain(self,data):
+        update =  self.fft(data)
+        self.plotAfter(update)
+        self.updateSpectrogram(update)
+
+    def fft(self,data):
+
+        self.N = self.samplingfrequency * int(self.duration)
+        self.yrfft = rfft(data)
+        self.xrfft = rfftfreq(int(self.N), 1.0 / self.samplingfrequency)
+        sumofgain =0
+        self.BW = int(len(self.yrfft)/10)
+        for i in range (10):
+            self.yrfft[i*self.BW : (i+1)*self.BW]*=self.Slider[i].value()
+            sumofgain += self.Slider[i].value()
+        if sumofgain == 0:
+            self.yrfft[:] =0
+
+        yt = irfft(self.yrfft)
+
+        return np.real(yt) 
 
     def Spectrogram(self, data):
         self.Spectrogram_Before.clear()
@@ -492,27 +515,6 @@ class Ui_MainWindow(object):
         self.Spectrogram_Before.setLabel('right', "Frequency", units='Hz')
         self.Spectrogram_Before.plotItem.setTitle("After")
         
-
-    def fft(self,data):
-
-        self.N = self.samplingfrequency * int(self.duration)
-        self.yrfft = rfft(data)
-        self.xrfft = rfftfreq(int(self.N), 1.0 / self.samplingfrequency)
-        sumofgain =0
-        self.BW = int(len(self.yrfft)/10)
-        for i in range (10):
-            self.yrfft[i*self.BW : (i+1)*self.BW]*=self.Slider[i].value()
-            sumofgain += self.Slider[i].value()
-        if sumofgain == 0:
-            self.yrfft[:] =0
-
-        self.yt = irfft(self.yrfft)
-
-                                     
-        self.updateSpectrogram(np.real(self.yt))
-        self.plotAfter(np.real(self.yt))
-
-
     def updateSpectrogram(self,data):
 
         self.Spectrogram_After.clear()
