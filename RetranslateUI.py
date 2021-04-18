@@ -45,9 +45,12 @@ def retranslateUi(self, MainWindow):
     self.actionEqualizer.setText(_translate("MainWindow", "Equalizer"))
     self.actionEqualizer.setShortcut(_translate("MainWindow", "Ctrl+E"))
     self.actionExit.setText(_translate("MainWindow", "Exit"))
-    self.actionClose_Tab.setText(_translate("MainWindow", "Close Tab"))
-    self.actionClose_Tab.setShortcut(_translate("MainWindow", "Ctrl+F4"))
-    self.actionGraph_theme.setText(_translate("MainWindow", "Graph"))
-    self.actionSpectrogram_theme.setText(
-        _translate("MainWindow", "Spectrogram"))
+    self.GraphTheme.setTitle(_translate("MainWindow", "Graph"))
+    self.SpectroTheme.setTitle(_translate("MainWindow", "Spectrogram"))
+    self.actionWhite.setText(_translate("MainWindow", "White"))
+    self.actionBlack.setText(_translate("MainWindow", "Black"))
+    for i in range(3):
+        self.actiontheme[i].setText(_translate("MainWindow", "Theme {n}".format(n=i+1)))
+    # self.actionClose_Tab.setText(_translate("MainWindow", "Close Tab"))
+    # self.actionClose_Tab.setShortcut(_translate("MainWindow", "Ctrl+F4"))
     # self.push
