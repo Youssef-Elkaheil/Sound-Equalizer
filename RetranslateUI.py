@@ -49,8 +49,11 @@ def retranslateUi(self, MainWindow):
     self.SpectroTheme.setTitle(_translate("MainWindow", "Spectrogram"))
     self.actionWhite.setText(_translate("MainWindow", "White"))
     self.actionBlack.setText(_translate("MainWindow", "Black"))
-    for i in range(3):
-        self.actiontheme[i].setText(_translate("MainWindow", "Theme {n}".format(n=i+1)))
+    self.actiontheme[0].setText(_translate(
+        "MainWindow", "Defualt"))
+    self.actiontheme[1].setText(_translate(
+        "MainWindow", "Theme 1"))
+    self.actiontheme[2].setText(_translate("MainWindow", "Theme 2"))
     # self.actionClose_Tab.setText(_translate("MainWindow", "Close Tab"))
     # self.actionClose_Tab.setShortcut(_translate("MainWindow", "Ctrl+F4"))
     # self.push
