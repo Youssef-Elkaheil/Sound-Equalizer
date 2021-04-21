@@ -212,9 +212,6 @@ class Ui_MainWindow(object):
         self.actionOpen.setIcon(icon1)
         self.actionOpen.setObjectName("actionOpen")
 
-        # self.actionNew = QtWidgets.QAction(MainWindow)
-        # self.actionNew.setObjectName("actionNew")
-
         self.actionSave = QtWidgets.QAction(MainWindow)
         icon2 = QtGui.QIcon()
         icon2.addPixmap(QtGui.QPixmap(":/Resources/images/save.png"),
@@ -293,20 +290,13 @@ class Ui_MainWindow(object):
         self.actionSound.setObjectName("actionSound")
         self.actionExit = QtWidgets.QAction(MainWindow)
         self.actionExit.setObjectName("actionExit")
-        # self.actionClose_Tab = QtWidgets.QAction(MainWindow)
-        # self.actionClose_Tab.setObjectName("actionClose_Tab")
-        # self.actionGraph_theme = QtWidgets.QAction(MainWindow)
-        # self.actionGraph_theme.setObjectName("actionGraph_theme")
-        # self.actionSpectrogram_theme = QtWidgets.QAction(MainWindow)
-        # self.actionSpectrogram_theme.setObjectName("actionSpectrogram_theme")
+
         self.menuFile.addAction(self.actionOpen)
         self.menuFile.addSeparator()
-        # self.menuFile.addAction(self.actionNew)
-        # self.menuFile.addSeparator()
+
         self.menuFile.addAction(self.actionSave)
         self.menuFile.addSeparator()
         self.menuFile.addAction(self.actionExit)
-        # self.menuFile.addAction(self.actionClose_Tab)
 
         self.menuScroll.addAction(self.actionLeft)
         self.menuScroll.addAction(self.actionRight)
@@ -356,7 +346,8 @@ class Ui_MainWindow(object):
         self.step = 0.5
         self.timer = QtCore.QTimer()
         self.timer.timeout.connect(lambda: Navigations.Update(self))
-        self.timer.setInterval(1000)
+        self.speed = 500
+        self.timer.setInterval(self.speed)
         self.timer.start()
         self.open =0
         self.duration =0
@@ -533,7 +524,7 @@ class Ui_MainWindow(object):
         self.Spectrogram_Before.setLabel('bottom', "Time", units='s')
         self.Spectrogram_Before.setLabel('left', "Frequency", units='Hz')
         self.Spectrogram_Before.setLabel('right', "Frequency", units='Hz')
-        self.Spectrogram_Before.plotItem.setTitle("After")
+        self.Spectrogram_Before.plotItem.setTitle("Before")
         
     def updateSpectrogram(self,data):
         self.Spectrogram_After.clear()
@@ -577,16 +568,17 @@ class Ui_MainWindow(object):
         if len(self.data) >0:
             filename, _ = QtWidgets.QFileDialog.getSaveFileName(
                 None, "WAV files (.wav)")
-            name = filename
             if filename:
                 if QtCore.QFileInfo(filename).suffix() == "":
                     filename += ".wav"
                 self.generate_WavFile(filename)
+                name = filename
                 self.PDF_Report(name)
 
     def generate_WavFile(self, filename):
-        maximum = np.max(np.abs(self.yt))
-        data = (self.yt / maximum).astype(np.float32)
+        yt = self.fft(self.signalData)
+        maximum = np.max(yt)
+        data = ( yt/ maximum).astype(np.float32)
         wavfile.write(filename, int(self.samplingfrequency), data)  
 
     def PDF_Report(self,filename):
@@ -623,7 +615,7 @@ class Ui_MainWindow(object):
         exporter.parameters()['height'] = 250
         exporter.export('SpectroBefore.png')
         pdf.image('SpectroBefore.png', x=None, y=None, w=180, h=50)
-
+        
         pdf.output(filename.replace('.wav' ,'.pdf'))
 
     def show_child(self):

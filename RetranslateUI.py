@@ -39,7 +39,7 @@ def retranslateUi(self, MainWindow):
     self.actionPlay.setText(_translate("MainWindow", "Play"))
     self.actionPlay.setShortcut(_translate("MainWindow", "Space"))
     self.actionSound.setText(_translate("MainWindow", "Sound"))
-    self.actionSound.setShortcut(_translate("MainWindow", "Ctrl+S"))
+    self.actionSound.setShortcut(_translate("MainWindow", "Ctrl+Space"))
     self.actionSpectrogram.setText(_translate("MainWindow", "Spectrogram"))
     self.actionSpectrogram.setShortcut(_translate("MainWindow", "Ctrl+F"))
     self.actionEqualizer.setText(_translate("MainWindow", "Equalizer"))

@@ -22,6 +22,10 @@ def scroll_right(self):
         self.Graph_After.setXRange(xrange[0] + self.step/10, xrange[1] + self.step/10, padding=0)
         self.Graph_Before.setXRange(xrange[0] + self.step/10, xrange[1] + self.step/10, padding=0)
     else:
+        self.Graph_After.setXRange(
+            self.duration - self.step/10, self.duration, padding=0)
+        self.Graph_Before.setXRange(
+            self.duration - self.step/10, self.duration, padding=0)
         self.timer.stop()
         self.actionPlay.setChecked(False)
 
@@ -47,14 +51,16 @@ def Update(self):
     
 
 def SpeedUp(self):
-    if self.step < 1:
-        self.step +=0.25
+    if self.speed >250:
+        self.step -= 250
+    self.timer.setInterval(self.speed)
+
 
 
 def SpeedDown(self):
-    if self.step >0.25:
-        self.step -= 0.25
-
+    if self.step < 1000:
+        self.speed +=250
+    self.timer.setInterval(self.speed)
 
 def ShowEqualizer(self, MainWindow):
     if self.actionEqualizer.isChecked():
