@@ -18,17 +18,20 @@ def Zoom_out(self):
 
 def scroll_right(self):
     xrange, yrange = self.Graph_After.viewRange()
-    if xrange[1] < self.duration-self.speed:
-        self.Graph_After.setXRange(xrange[0] + self.speed, xrange[1] + self.speed, padding=0)
-        self.Graph_Before.setXRange(xrange[0] + self.speed, xrange[1] + self.speed, padding=0)
+    if xrange[1] < self.duration-self.step/10:
+        self.Graph_After.setXRange(xrange[0] + self.step/10, xrange[1] + self.step/10, padding=0)
+        self.Graph_Before.setXRange(xrange[0] + self.step/10, xrange[1] + self.step/10, padding=0)
+    else:
+        self.timer.stop()
+        self.actionPlay.setChecked(False)
 
 
 def scroll_left(self):
     xrange, yrange = self.Graph_After.viewRange()
     if xrange[0]>0:
-        self.Graph_After.setXRange(xrange[0] - self.speed, xrange[1] - self.speed, padding=0)
+        self.Graph_After.setXRange(xrange[0] - self.step/10, xrange[1] - self.step/10, padding=0)
         self.Graph_Before.setXRange(
-            xrange[0] - self.speed, xrange[1] - self.speed, padding=0)
+            xrange[0] - self.step/10, xrange[1] - self.step/10, padding=0)
     else:
         self.Graph_After.setXRange(0, xrange[1]-xrange[0], padding=0)
         self.Graph_Before.setXRange(0, xrange[1]-xrange[0], padding=0)
@@ -36,24 +39,21 @@ def scroll_left(self):
 
 def Update(self):
     xrange, yrange = self.Graph_After.viewRange()
-    if self.actionPlay.isChecked() and xrange[1]<self.duration:
-        self.Graph_After.setXRange(
-            xrange[0]+self.speed/10, xrange[1] + self.speed/10, padding=0)
-        self.Graph_Before.setXRange(
-            xrange[0]+self.speed/10, xrange[1] + self.speed/10, padding=0)
-    else:
-        self.timer.stop()
-        self.actionPlay.setChecked(False)
+    if self.actionPlay.isChecked():
+        scroll_right(self)
+    # else:
+    #     self.timer.stop()
+    #     self.actionPlay.setChecked(False)
     
 
 def SpeedUp(self):
-    if self.speed < 1:
-        self.speed +=0.25
+    if self.step < 1:
+        self.step +=0.25
 
 
 def SpeedDown(self):
-    if self.speed >0.25:
-        self.speed -= 0.25
+    if self.step >0.25:
+        self.step -= 0.25
 
 
 def ShowEqualizer(self, MainWindow):
