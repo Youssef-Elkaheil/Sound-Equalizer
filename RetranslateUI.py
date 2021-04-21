@@ -54,6 +54,8 @@ def retranslateUi(self, MainWindow):
     self.actiontheme[1].setText(_translate(
         "MainWindow", "Theme 1"))
     self.actiontheme[2].setText(_translate("MainWindow", "Theme 2"))
+
     # self.actionClose_Tab.setText(_translate("MainWindow", "Close Tab"))
     # self.actionClose_Tab.setShortcut(_translate("MainWindow", "Ctrl+F4"))
     # self.push
+

@@ -350,22 +350,25 @@ class Ui_MainWindow(object):
         self.toolBar.addAction(self.actionEqualizer)
         self.toolBar.addAction(self.actionSpectrogram)
         self.data =[]
-
-        self.Pallete0 = (75, 0, 113, 255)
-        self.Pallete0_5 = (0, 182, 188, 255)
-        self.Pallete1 = (246, 111, 0, 255)
+        self.Pallete0 = [75, 0, 115, 255]
+        self.Pallete0_5 = [0, 180, 190, 255]
+        self.Pallete1 = [245, 110, 0, 255]
         self.speed = 500
         self.timer = QtCore.QTimer()
         self.timer.timeout.connect(lambda: Navigations.Update(self))
-        self.timer.setInterval(10)
+        self.timer.setInterval(100)
         self.timer.start()
         self.open =0
         self.duration =0
+        self.minvalue = 0
+        self.middlevalue =0.5
+        self.maxvalue = 1
 
                                                                         #Methods' Declaration
-      
         retranslateUi = RetranslateUI.retranslateUi
+
                                                                         #Calling Methods
+
         retranslateUi(self, MainWindow)
         self.actionOpen.triggered.connect(self.getFile)
         # self.actionNew.triggered.connect(self.show_child)
@@ -406,39 +409,39 @@ class Ui_MainWindow(object):
         self.Spectrogram_Before.setBackground('#000')
         self.Spectrogram_After.setBackground('#000')
     
-    def theme (self,i):
+    def theme (self,i=1):
         if i ==1:
-            self.Pallete0 = (75, 0, 113, 255)
-            self.Pallete0_5 = (0, 182, 188, 255)
-            self.Pallete1 = (246, 111, 0, 255)
+            self.Pallete0 = [75, 0, 115, 255]
+            self.Pallete0_5 = [0, 180, 190, 255]
+            self.Pallete1 = [245, 110, 0, 255]
         elif i == 2:
-            self.Pallete0 = (0, 0, 255, 255)
-            self.Pallete0_5 = (75, 182, 110, 255)
-            self.Pallete1 = (255, 0, 0, 255)
+            self.Pallete0 = [245, 0, 115, 255]
+            self.Pallete0_5 = [0, 180, 190, 255]
+            self.Pallete1 = [75, 110, 0, 255]
         elif i == 3:
-            self.Pallete0 = (0, 0, 255,255)
-            self.Pallete0_5 = (150, 110, 75,255)
-            self.Pallete1 = (255, 0, 0,255)
+            self.Pallete0 = [0, 180, 190, 255]
+            self.Pallete0_5 = [245, 110, 0, 255]
+            self.Pallete1 = [75, 0, 115, 255]
+
         yt = self.fft(self.signalData)
         self.Spectrogram(self.signalData)
-        self.updateSpectrogram(np.real(yt))
+        self.updateSpectrogram(yt)
 
     def colorchange(self):
-        update =[]
-        self.minvalue = (
-            float(self.SpectroSlider[0].value())/10)*self.max_freq
-        self.maxvalue = (
-            float(self.SpectroSlider[1].value())/10)*self.max_freq
-        for x in range(len(self.xrfft)):
-            if (self.xrfft[x] > self.minvalue) and (self.xrfft[x] < self.maxvalue):
-                update.append(self.yrfft[x])
-            else:
-                update.append(0)
-        specupdate= np.real(irfft(update))
-        original = self.signalData.copy()
+        self.minvalue = (self.SpectroSlider[0].value()/10)
+        self.maxvalue = (self.SpectroSlider[1].value()/10)
+        self.middlevalue = (self.maxvalue + self.minvalue)/2
 
-        self.Spectrogram(original)
-        self.updateSpectrogram(specupdate)
+        yt = self.fft(self.signalData)
+        self.Spectrogram(self.signalData)
+        self.updateSpectrogram(yt)
+
+    def maxchange(self):
+        if self.SpectroSlider[1].value() > self.SpectroSlider[0].value():
+            self.colorchange()
+        else:
+            self.SpectroSlider[1].setSliderPosition(
+                self.SpectroSlider[0].value()+1)
 
     def minchange(self):
         if self.SpectroSlider[1].value() > self.SpectroSlider[0].value():
@@ -447,12 +450,6 @@ class Ui_MainWindow(object):
             self.SpectroSlider[0].setSliderPosition(
                 self.SpectroSlider[1].value()-1)
             
-    def maxchange(self):
-        if self.SpectroSlider[1].value() > self.SpectroSlider[0].value():
-            self.colorchange()
-        else:
-            self.SpectroSlider[1].setSliderPosition(
-                self.SpectroSlider[0].value()+1)
        
     
     def getFile(self):
@@ -477,6 +474,8 @@ class Ui_MainWindow(object):
                     self.data.append(self.signalData[i])
             self.time = np.arange(0,self.duration,1/self.samplingfrequency)
             intial_plot = self.fft(self.data)
+            self.Graph_After.setXRange(0, self.duration, padding=0)
+            self.Graph_Before.setXRange(0,self.duration, padding=0)
             self.plotAfter(intial_plot)
             self.plotBefore(intial_plot)
             self.Spectrogram(self.signalData)
@@ -493,11 +492,10 @@ class Ui_MainWindow(object):
             self.play_audio()
 
     def fft(self,data):
-
         self.N = self.samplingfrequency * int(self.duration)
         self.yrfft = rfft(np.real(data))
         self.xrfft = rfftfreq(int(self.N), 1.0 / self.samplingfrequency)
-        self.max_freq = np.max(self.xrfft)
+        # self.max_freq = np.max(self.xrfft)
         sumofgain =0
         self.BW = int(len(self.yrfft)/10)
         for i in range (10):
@@ -505,80 +503,62 @@ class Ui_MainWindow(object):
             sumofgain += self.Slider[i].value()
         if sumofgain == 0:
             self.yrfft[:] =0
-
         yt = irfft(self.yrfft)
-
         return np.real(yt) 
 
     def Spectrogram(self, data):
         self.Spectrogram_Before.clear()
         self.Spectrogram_Before.plotItem.clear()
         pg.setConfigOptions(imageAxisOrder='row-major')
-
         freq, time, Spectrodata = signal.spectrogram(
             data, self.samplingfrequency)
-        
         img_After = pg.ImageItem()
         self.Spectrogram_Before.addItem(img_After)
-
         hist_After = pg.HistogramLUTItem()
-
         hist_After.setImageItem(img_After)
         hist_After.setLevels(min=np.min(Spectrodata), max=np.max(Spectrodata))
-
         hist_After.gradient.restoreState(
             {'mode': 'rgb',
-                'ticks': [(0.5,self.Pallete0_5),(1.0, self.Pallete1),(0.0, self.Pallete0)]})
+                'ticks':[(self.maxvalue, self.Pallete1), 
+                        (self.middlevalue, self.Pallete0_5),
+                        (self.minvalue, self.Pallete0)]})
         img_After.setImage(Spectrodata)
-        min_freq = float(self.SpectroSlider[0].value()*freq[-1])/10
-        max_freq = float(self.SpectroSlider[1].value()*freq[-1])/10
-        
         img_After.scale(time[-1]/np.size(Spectrodata, axis=1),
                         freq[-1]/np.size(Spectrodata, axis=0))
-
         self.Spectrogram_Before.addItem(img_After)
-        
         self.Spectrogram_Before.setLimits(
             xMin=time[0], xMax=time[-1],
-             yMin=min_freq, yMax=max_freq)
-    
-        self.Spectrogram_Before.setYRange(min_freq, max_freq)
+             yMin=freq[0], yMax=freq[-1])
+        self.Spectrogram_Before.setYRange(freq[0], freq[-1])
         self.Spectrogram_Before.setLabel('bottom', "Time", units='s')
         self.Spectrogram_Before.setLabel('left', "Frequency", units='Hz')
         self.Spectrogram_Before.setLabel('right', "Frequency", units='Hz')
         self.Spectrogram_Before.plotItem.setTitle("After")
         
     def updateSpectrogram(self,data):
-
         self.Spectrogram_After.clear()
         self.Spectrogram_After.plotItem.clear()
         pg.setConfigOptions(imageAxisOrder='row-major')
-
         freq, time, Spectrodata = signal.spectrogram(
-            data, self.samplingfrequency)
-        
+            data, self.samplingfrequency)        
         img_After = pg.ImageItem()
         self.Spectrogram_After.addItem(img_After)
-
         hist_After = pg.HistogramLUTItem()
-
         hist_After.setImageItem(img_After)
         hist_After.setLevels(min=np.min(Spectrodata), max=np.max(Spectrodata))
-
         hist_After.gradient.restoreState(
             {'mode': 'rgb',
-                'ticks': [(1.0, self.Pallete1),(0.5,self.Pallete0_5),(0.0, self.Pallete0)]})
+                'ticks':[(self.maxvalue , self.Pallete1),
+                        (self.middlevalue,self.Pallete0_5),
+                        (self.minvalue , self.Pallete0)]})
         img_After.setImage(Spectrodata)
-
-        min_freq = float(self.SpectroSlider[0].value()*freq[-1])/10
-        max_freq = float(self.SpectroSlider[1].value()*np.max(self.xrfft)/10)
         img_After.scale(time[-1]/np.size(Spectrodata, axis=1),
                         freq[-1]/np.size(Spectrodata, axis=0))
         self.Spectrogram_After.addItem(img_After)
         self.Spectrogram_After.setLimits(
             xMin=time[0], xMax=time[-1],
-            yMin=min_freq, yMax=max_freq)
-        self.Spectrogram_After.setYRange(min_freq, max_freq)
+            yMin=freq[0], yMax=freq[-1])
+        self.Spectrogram_After.setYRange(freq[0], freq[-1])
         self.Spectrogram_After.setLabel('bottom', "Time", units='s')
         self.Spectrogram_After.setLabel('left', "Frequency", units='Hz')
         self.Spectrogram_After.setLabel('right', "Frequency", units='Hz')
@@ -657,6 +637,8 @@ class Ui_MainWindow(object):
         self.Graph_After.setLabel("left", "Amplitude")
         self.Graph_After.setLabel("bottom", "Time")
         self.Graph_After.setYRange(-max(data),max(data))
+        self.Graph_Before.setYRange(-max(data),
+                                    max(data))
         self.Graph_After.plot(self.time,data)
 
     def plotBefore(self,data):
@@ -664,8 +646,6 @@ class Ui_MainWindow(object):
         self.Graph_Before.setTitle('Before', color='w', size='12pt')
         self.Graph_Before.setLabel("left", "Amplitude")
         self.Graph_Before.setLabel("bottom", "Time")
-        self.Graph_Before.setYRange(-max(data),
-                                   max(data))
         self.Graph_Before.plot(self.time, data)
 
 app = QtWidgets.QApplication(sys.argv)
