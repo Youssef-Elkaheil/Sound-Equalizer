@@ -13,54 +13,59 @@ def Zoom_out(self):
         self.Graph_Before.setXRange(xrange[0]*2 , xrange[1] * 2, padding=0)
     else:
         self.Graph_After.setXRange(0, self.duration, padding=0)
-        self.Graph_Before.setXRange(0, len(self.duration), padding=0)
+        self.Graph_Before.setXRange(0,self.duration, padding=0)
 
 
 def scroll_right(self):
     xrange, yrange = self.Graph_After.viewRange()
-    if xrange[1] < self.duration-self.step/10:
-        self.Graph_After.setXRange(xrange[0] + self.step/10, xrange[1] + self.step/10, padding=0)
-        self.Graph_Before.setXRange(xrange[0] + self.step/10, xrange[1] + self.step/10, padding=0)
+    if xrange[1] < self.duration-self.step:
+        self.Graph_After.setXRange(xrange[0] + self.step, xrange[1] + self.step, padding=0)
+        self.Graph_Before.setXRange(xrange[0] + self.step, xrange[1] + self.step, padding=0)
     else:
-        self.Graph_After.setXRange(
-            self.duration - self.step/10, self.duration, padding=0)
-        self.Graph_Before.setXRange(
-            self.duration - self.step/10, self.duration, padding=0)
         self.timer.stop()
         self.actionPlay.setChecked(False)
+    #     self.Graph_After.setXRange(
+    #         self.duration - self.step, self.duration, padding=0)
+    #     self.Graph_Before.setXRange(
+    #         self.duration - self.step, self.duration, padding=0)
+
 
 
 def scroll_left(self):
     xrange, yrange = self.Graph_After.viewRange()
     if xrange[0]>0:
-        self.Graph_After.setXRange(xrange[0] - self.step/10, xrange[1] - self.step/10, padding=0)
+        self.Graph_After.setXRange(xrange[0] - self.step, xrange[1] - self.step, padding=0)
         self.Graph_Before.setXRange(
-            xrange[0] - self.step/10, xrange[1] - self.step/10, padding=0)
-    else:
-        self.Graph_After.setXRange(0, xrange[1]-xrange[0], padding=0)
-        self.Graph_Before.setXRange(0, xrange[1]-xrange[0], padding=0)
+            xrange[0] - self.step, xrange[1] - self.step, padding=0)
+    # else:
+    #     self.Graph_After.setXRange(0, self.step, padding=0)
+    #     self.Graph_Before.setXRange(0, self.step, padding=0)
 
 
 def Update(self):
     xrange, yrange = self.Graph_After.viewRange()
     if self.actionPlay.isChecked():
         scroll_right(self)
+        # self.Graph_After.setXRange(
+        #     xrange[0] + self.step, xrange[1] + self.step, padding=0)
+        # self.Graph_Before.setXRange(
+        #     xrange[0] + self.step, xrange[1] + self.step, padding=0)
     # else:
     #     self.timer.stop()
     #     self.actionPlay.setChecked(False)
     
 
 def SpeedUp(self):
-    if self.speed >250:
-        self.step -= 250
-    self.timer.setInterval(self.speed)
+    if self.step <0.16:
+        self.step *= 2
+    # self.timer.setInterval(self.speed)
 
 
 
 def SpeedDown(self):
-    if self.step < 1000:
-        self.speed +=250
-    self.timer.setInterval(self.speed)
+    if self.step >0.0025:
+        self.step /=2
+    # self.timer.setInterval(self.speed)
 
 def ShowEqualizer(self, MainWindow):
     if self.actionEqualizer.isChecked():

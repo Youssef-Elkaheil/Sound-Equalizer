@@ -1,22 +1,22 @@
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtWidgets import QFileDialog
+from pyqtgraph.functions import mkPen
 from scipy.fft import rfft, rfftfreq
+from pyqtgraph import exporters
 from scipy.fft import irfft
-import pyqtgraph as pg
+from scipy.io import wavfile
+import sounddevice as sd
 from scipy import signal
+import pyqtgraph as pg
+from fpdf import FPDF
 import RetranslateUI
 import Navigations
-import Resources
-import sys
 import numpy as np
-import librosa
-import os
-import sounddevice as sd
-from fpdf import FPDF
-from scipy.io import wavfile
-from pyqtgraph import exporters
 import contextlib
+import Resources
 import wave
+import sys
+import os
 
 class ApplicationWindow(QtWidgets.QMainWindow):
     def __init__(self):
@@ -64,10 +64,6 @@ class Ui_MainWindow(object):
         self.tabWidget.setTabShape(QtWidgets.QTabWidget.Rounded)
         self.tabWidget.setIconSize(QtCore.QSize(32, 32))
         self.tabWidget.setElideMode(QtCore.Qt.ElideLeft)
-        #self.tabWidget.setDocumentMode(False)
-        # self.tabWidget.setTabsClosable(True)
-        # self.tabWidget.setMovable(True)
-        #self.tabWidget.setTabBarAutoHide(True)
         self.tabWidget.setObjectName("tabWidget")
         self.tab = QtWidgets.QWidget()
         self.tab.setObjectName("tab")
@@ -75,22 +71,16 @@ class Ui_MainWindow(object):
         self.Graph_Before.setGeometry(QtCore.QRect(50, 550, 0 , 0))
         self.Graph_Before.setObjectName("Graph_Before")
         self.Graph_Before.setTitle("Before")
-
         self.Spectrogram_Before = pg.PlotWidget(self.tab)
         self.Spectrogram_Before.setGeometry(QtCore.QRect(1050, 520, 0, 0))
         self.Spectrogram_Before.setObjectName("Spectrogram_Before")
-
         self.Spectrogram_After = pg.PlotWidget(self.tab)
         self.Spectrogram_After.setGeometry(QtCore.QRect(1050, 10, 0, 0))
         self.Spectrogram_After.setObjectName("Spectrogram_After")
-
-
-
         self.Graph_After = pg.PlotWidget(self.tab)
         self.Graph_After.setGeometry(QtCore.QRect(50, 10, 961, 271))
         self.Graph_After.setObjectName("Graph_After")
         self.Graph_After.setTitle("After")
-        
         self.frame = QtWidgets.QFrame(self.tab)
         self.frame.setGeometry(QtCore.QRect(50, 310, 0, 0))
         self.frame.setLayoutDirection(QtCore.Qt.LeftToRight)
@@ -129,7 +119,6 @@ class Ui_MainWindow(object):
             self.Slider[i].setTickInterval(1)
             self.Slider[i].setObjectName("Slider_{}".format(i+1))
             self.horizontalLayout.addWidget(self.Slider[i])
-
         self.SpectroSlider =[]
         for i in range(2):
             self.SpectroSlider.append(QtWidgets.QSlider(self.tab))
@@ -146,9 +135,6 @@ class Ui_MainWindow(object):
             self.SpectroSlider[i].setTickInterval(1)
             self.SpectroSlider[i].setGeometry(QtCore.QRect(1075,425-i*50,380,35))
             self.SpectroSlider[i].setObjectName("scpectoSlider_{}".format(i+1))
-        
-
-
         self.layoutWidget_2 = QtWidgets.QWidget(self.frame)
         self.layoutWidget_2.setGeometry(QtCore.QRect(0, 180, 961, 31))
         self.layoutWidget_2.setObjectName("layoutWidget_2")
@@ -166,7 +152,6 @@ class Ui_MainWindow(object):
             self.label[i].setIndent(3+i*6)
             self.label[i].setObjectName("label_{}".format(i+1))
             self.horizontalLayout_2.addWidget(self.label[i])
-
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtWidgets.QMenuBar(MainWindow)
         self.menubar.setGeometry(QtCore.QRect(0, 0, 1537, 26))
@@ -195,7 +180,6 @@ class Ui_MainWindow(object):
         self.toolBar.setFloatable(False)
         self.toolBar.setObjectName("toolBar")
         MainWindow.addToolBar(QtCore.Qt.TopToolBarArea, self.toolBar)
-
         self.actionWhite = QtWidgets.QAction(MainWindow)
         self.actionWhite.setObjectName("actionWhite")
         self.actionBlack = QtWidgets.QAction(MainWindow)
@@ -204,14 +188,12 @@ class Ui_MainWindow(object):
         for i in range(3):
             self.actiontheme.append(QtWidgets.QAction(MainWindow))
             self.actiontheme[i].setObjectName("actiontheme{n}]".format(n=i))
-
         self.actionOpen = QtWidgets.QAction(MainWindow)
         icon1 = QtGui.QIcon()
         icon1.addPixmap(QtGui.QPixmap(":/Resources/images/open.png"),
                         QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self.actionOpen.setIcon(icon1)
         self.actionOpen.setObjectName("actionOpen")
-
         self.actionSave = QtWidgets.QAction(MainWindow)
         icon2 = QtGui.QIcon()
         icon2.addPixmap(QtGui.QPixmap(":/Resources/images/save.png"),
@@ -290,14 +272,11 @@ class Ui_MainWindow(object):
         self.actionSound.setObjectName("actionSound")
         self.actionExit = QtWidgets.QAction(MainWindow)
         self.actionExit.setObjectName("actionExit")
-
         self.menuFile.addAction(self.actionOpen)
         self.menuFile.addSeparator()
-
         self.menuFile.addAction(self.actionSave)
         self.menuFile.addSeparator()
         self.menuFile.addAction(self.actionExit)
-
         self.menuScroll.addAction(self.actionLeft)
         self.menuScroll.addAction(self.actionRight)
         self.menuZoom.addAction(self.actionZoom_in)
@@ -308,7 +287,6 @@ class Ui_MainWindow(object):
         self.GraphTheme.addAction(self.actionBlack)
         for i in range(3):
             self.SpectroTheme.addAction(self.actiontheme[i])
-
         self.menuNavigation.addAction(self.menuZoom.menuAction())
         self.menuNavigation.addSeparator()
         self.menuNavigation.addAction(self.menuScroll.menuAction())
@@ -343,7 +321,7 @@ class Ui_MainWindow(object):
         self.Pallete0 = [75, 0, 115, 255]
         self.Pallete0_5 = [0, 180, 190, 255]
         self.Pallete1 = [245, 110, 0, 255]
-        self.step = 0.5
+        self.step = 0.02
         self.timer = QtCore.QTimer()
         self.timer.timeout.connect(lambda: Navigations.Update(self))
         self.speed = 500
@@ -354,38 +332,34 @@ class Ui_MainWindow(object):
         self.minvalue = 0
         self.middlevalue =0.5
         self.maxvalue = 1
-
                                                                         #Methods' Declaration
         retranslateUi = RetranslateUI.retranslateUi
 
                                                                         #Calling Methods
-
         retranslateUi(self, MainWindow)
+        self.actionRight.triggered.connect(lambda : Navigations.scroll_right(self))
+        self.actionZoom_out.triggered.connect(lambda : Navigations.Zoom_out(self))
+        self.actionLeft.triggered.connect(lambda : Navigations.scroll_left(self))
+        self.actionSlower.triggered.connect(lambda : Navigations.SpeedDown(self))
+        self.actionZoom_in.triggered.connect(lambda : Navigations.Zoom_in(self))
+        self.actionFaster.triggered.connect(lambda : Navigations.SpeedUp(self))
+        self.SpectroSlider[0].valueChanged.connect(self.minchange)
+        self.SpectroSlider[1].valueChanged.connect(self.maxchange)
+        self.actionWhite.triggered.connect(self.White_background)
+        self.actionBlack.triggered.connect(self.Black_background)
+        self.actionPlay.triggered.connect(self.timer.start)
+        self.actionSound.triggered.connect(self.play_audio)
         self.actionOpen.triggered.connect(self.getFile)
-        # self.actionNew.triggered.connect(self.show_child)
         self.actionSpectrogram.triggered.connect(
             lambda : Navigations.ShowSpectrogram(self,MainWindow))
         self.actionEqualizer.triggered.connect(
             lambda: Navigations.ShowEqualizer(self, MainWindow))
-        self.actionZoom_in.triggered.connect(lambda : Navigations.Zoom_in(self))
-        self.actionZoom_out.triggered.connect(lambda : Navigations.Zoom_out(self))
-        self.actionLeft.triggered.connect(lambda : Navigations.scroll_left(self))
-        self.actionRight.triggered.connect(lambda : Navigations.scroll_right(self))
-        self.actionPlay.triggered.connect(self.timer.start)
-        self.actionFaster.triggered.connect(lambda : Navigations.SpeedUp(self))
-        self.actionSlower.triggered.connect(lambda : Navigations.SpeedDown(self))
         self.actionSave.triggered.connect(self.saveFile)
-        self.actionSound.triggered.connect(self.play_audio)
-        self.actionWhite.triggered.connect(self.White_background)
-        self.actionBlack.triggered.connect(self.Black_background)
-        self.actiontheme[0].triggered.connect(lambda : self.theme(1))
-        self.actiontheme[1].triggered.connect(lambda: self.theme(2))
-        self.actiontheme[2].triggered.connect(lambda: self.theme(3))
+        for x in range(3):
+            self.actiontheme[x].triggered.connect(lambda checked, x=x: self.theme(x))
+
         for i in range(10):
             self.Slider[i].valueChanged.connect(lambda : self.Gain(self.data))
-        
-        self.SpectroSlider[0].valueChanged.connect(self.minchange)
-        self.SpectroSlider[1].valueChanged.connect(self.maxchange)
         
 
     def White_background(self):
@@ -400,16 +374,17 @@ class Ui_MainWindow(object):
         self.Spectrogram_Before.setBackground('#000')
         self.Spectrogram_After.setBackground('#000')
     
-    def theme (self,i=1):
-        if i ==1:
+    def theme (self,i):
+        print(i)
+        if i ==0:
             self.Pallete0 = [75, 0, 115, 255]
             self.Pallete0_5 = [0, 180, 190, 255]
             self.Pallete1 = [245, 110, 0, 255]
-        elif i == 2:
+        elif i == 1:
             self.Pallete0 = [245, 0, 115, 255]
             self.Pallete0_5 = [0, 180, 190, 255]
             self.Pallete1 = [75, 110, 0, 255]
-        elif i == 3:
+        elif i == 2:
             self.Pallete0 = [0, 180, 190, 255]
             self.Pallete0_5 = [245, 110, 0, 255]
             self.Pallete1 = [75, 0, 115, 255]
@@ -455,8 +430,6 @@ class Ui_MainWindow(object):
             self.duration = self.frames / float(self.rate)
             self.samplingfrequency, self.signalData = wavfile.read(self.filePath)
             self.array=np.asarray(self.signalData)
-
-            
             if len(self.array.shape) == 2:
                 for i in range(len(self.signalData)):
                     self.data.append(self.signalData[i][0])
@@ -483,22 +456,16 @@ class Ui_MainWindow(object):
             self.play_audio()
 
     def fft(self,data):
-        self.N = self.samplingfrequency * int(self.duration)
+        self.No_samples = self.samplingfrequency * int(self.duration)
         self.yrfft = rfft(np.real(data))
-        self.xrfft = rfftfreq(int(self.N), 1.0 / self.samplingfrequency)
-        # self.max_freq = np.max(self.xrfft)
-        sumofgain =0
+        self.xrfft = rfftfreq(int(self.No_samples), 1.0 / self.samplingfrequency)
         self.BW = int(len(self.yrfft)/10)
         for i in range (10):
             self.yrfft[i*self.BW : (i+1)*self.BW]*=self.Slider[i].value()
-            sumofgain += self.Slider[i].value()
-        if sumofgain == 0:
-            self.yrfft[:] =0
         yt = irfft(self.yrfft)
         return np.real(yt) 
 
     def Spectrogram(self, data):
-        self.Spectrogram_Before.clear()
         self.Spectrogram_Before.plotItem.clear()
         pg.setConfigOptions(imageAxisOrder='row-major')
         freq, time, Spectrodata = signal.spectrogram(
@@ -561,7 +528,6 @@ class Ui_MainWindow(object):
                     self.samplingfrequency,loop=True)
         else:
             sd.stop(self.data)
-            self.actionSound.setChecked(False)
 
     def saveFile(self):
         # allows the user to save the file and name it as they like
@@ -572,8 +538,7 @@ class Ui_MainWindow(object):
                 if QtCore.QFileInfo(filename).suffix() == "":
                     filename += ".wav"
                 self.generate_WavFile(filename)
-                name = filename
-                self.PDF_Report(name)
+                self.PDF_Report(filename)
 
     def generate_WavFile(self, filename):
         yt = self.fft(self.signalData)
