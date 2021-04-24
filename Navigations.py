@@ -1,59 +1,36 @@
 
-def Zoom_in(self):
+def Zoom(self,flag):
     xrange, yrange = self.Graph_After.viewRange()
-    if xrange[1]-xrange[0] > self.duration/1000:
-        self.Graph_After.setXRange(xrange[0]/2 , xrange[1]/2 , padding=0)
-        self.Graph_Before.setXRange(xrange[0]/2 , xrange[1]/2 , padding=0)
-
-
-def Zoom_out(self):
-    xrange, yrange = self.Graph_After.viewRange()
-    if xrange[1]*2 <= self.duration+1:
-        self.Graph_After.setXRange(xrange[0]*2 , xrange[1] * 2, padding=0)
-        self.Graph_Before.setXRange(xrange[0]*2 , xrange[1] * 2, padding=0)
+    if flag ==1:       #Zoom in
+        x = [i/2 for i in xrange]
+    elif flag ==0:     #Zoom out
+        x = [ i*2 for i in xrange]
+    if xrange[1]*2 <= self.duration+1 or flag ==1:
+        self.Graph_After.setXRange(x[0], x[1], padding=0)
+        self.Graph_Before.setXRange(x[0], x[1], padding=0)
     else:
         self.Graph_After.setXRange(0, self.duration, padding=0)
-        self.Graph_Before.setXRange(0,self.duration, padding=0)
+        self.Graph_Before.setXRange(0, self.duration, padding=0)
 
-
-def scroll_right(self):
+def Scroll (self,flag):
     xrange, yrange = self.Graph_After.viewRange()
-    if xrange[1] < self.duration-self.step:
-        self.Graph_After.setXRange(xrange[0] + self.step, xrange[1] + self.step, padding=0)
-        self.Graph_Before.setXRange(xrange[0] + self.step, xrange[1] + self.step, padding=0)
+    if flag == 1:  # scroll right
+        x = [i+self.step for i in xrange]
+    elif flag == 0:  # scroll left
+        x = [i-self.step for i in xrange]
+    if x[0]>0 and x[1]<self.duration:
+        self.Graph_After.setXRange(x[0], x[1], padding=0)
+        self.Graph_Before.setXRange(x[0], x[1], padding=0)
     else:
         self.timer.stop()
         self.actionPlay.setChecked(False)
-    #     self.Graph_After.setXRange(
-    #         self.duration - self.step, self.duration, padding=0)
-    #     self.Graph_Before.setXRange(
-    #         self.duration - self.step, self.duration, padding=0)
-
-
-
-def scroll_left(self):
-    xrange, yrange = self.Graph_After.viewRange()
-    if xrange[0]>0:
-        self.Graph_After.setXRange(xrange[0] - self.step, xrange[1] - self.step, padding=0)
-        self.Graph_Before.setXRange(
-            xrange[0] - self.step, xrange[1] - self.step, padding=0)
-    # else:
-    #     self.Graph_After.setXRange(0, self.step, padding=0)
-    #     self.Graph_Before.setXRange(0, self.step, padding=0)
-
-
+        
 def Update(self):
     xrange, yrange = self.Graph_After.viewRange()
     if self.actionPlay.isChecked():
-        scroll_right(self)
-        # self.Graph_After.setXRange(
-        #     xrange[0] + self.step, xrange[1] + self.step, padding=0)
-        # self.Graph_Before.setXRange(
-        #     xrange[0] + self.step, xrange[1] + self.step, padding=0)
-    # else:
-    #     self.timer.stop()
-    #     self.actionPlay.setChecked(False)
-    
+        Scroll(self,1)
+
+
 
 def SpeedUp(self):
     if self.step <0.16:
@@ -113,3 +90,48 @@ def ShowSpectrogram(self, MainWindow):
 
         self.Spectrogram_Before.resize(0, 0)
         self.Spectrogram_After.resize(0, 0)
+
+# def Zoom_in(self):
+#     xrange, yrange = self.Graph_After.viewRange()
+#     self.Graph_After.setXRange(xrange[0]/2 , xrange[1]/2 , padding=0)
+#     self.Graph_Before.setXRange(xrange[0]/2 , xrange[1]/2 , padding=0)
+
+
+# def Zoom_out(self):
+#     xrange, yrange = self.Graph_After.viewRange()
+#     if xrange[1]*2 <= self.duration+1:
+#         self.Graph_After.setXRange(xrange[0]*2 , xrange[1] * 2, padding=0)
+#         self.Graph_Before.setXRange(xrange[0]*2 , xrange[1] * 2, padding=0)
+#     else:
+#         self.Graph_After.setXRange(0, self.duration, padding=0)
+#         self.Graph_Before.setXRange(0,self.duration, padding=0)
+
+
+# def scroll_right(self):
+#     xrange, yrange = self.Graph_After.viewRange()
+#     if xrange[1] < self.duration-self.step:
+#         self.Graph_After.setXRange(xrange[0] + self.step, xrange[1] + self.step, padding=0)
+#         self.Graph_Before.setXRange(xrange[0] + self.step, xrange[1] + self.step, padding=0)
+#     else:
+#         self.timer.stop()
+#         self.actionPlay.setChecked(False)
+    #     self.Graph_After.setXRange(
+    #         self.duration - self.step, self.duration, padding=0)
+    #     self.Graph_Before.setXRange(
+    #         self.duration - self.step, self.duration, padding=0)
+
+
+
+# def scroll_left(self):
+#     xrange, yrange = self.Graph_After.viewRange()
+#     if xrange[0]>0:
+#         self.Graph_After.setXRange(xrange[0] - self.step, xrange[1] - self.step, padding=0)
+#         self.Graph_Before.setXRange(
+#             xrange[0] - self.step, xrange[1] - self.step, padding=0)
+    # else:
+    #     self.Graph_After.setXRange(0, self.step, padding=0)
+    #     self.Graph_Before.setXRange(0, self.step, padding=0)
+
+
+    
+

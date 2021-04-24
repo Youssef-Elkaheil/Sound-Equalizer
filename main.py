@@ -17,7 +17,7 @@ import Resources
 import wave
 import sys
 import os
-
+from matplotlib import pyplot as plt
 class ApplicationWindow(QtWidgets.QMainWindow):
     def __init__(self):
         super(ApplicationWindow, self).__init__()
@@ -185,7 +185,7 @@ class Ui_MainWindow(object):
         self.actionBlack = QtWidgets.QAction(MainWindow)
         self.actionBlack.setObjectName("actionBlack")
         self.actiontheme =[]
-        for i in range(3):
+        for i in range(5):
             self.actiontheme.append(QtWidgets.QAction(MainWindow))
             self.actiontheme[i].setObjectName("actiontheme{n}]".format(n=i))
         self.actionOpen = QtWidgets.QAction(MainWindow)
@@ -285,7 +285,7 @@ class Ui_MainWindow(object):
         self.menuSpeed.addAction(self.actionSlower)
         self.GraphTheme.addAction(self.actionWhite)
         self.GraphTheme.addAction(self.actionBlack)
-        for i in range(3):
+        for i in range(5):
             self.SpectroTheme.addAction(self.actiontheme[i])
         self.menuNavigation.addAction(self.menuZoom.menuAction())
         self.menuNavigation.addSeparator()
@@ -337,12 +337,12 @@ class Ui_MainWindow(object):
 
                                                                         #Calling Methods
         retranslateUi(self, MainWindow)
-        self.actionRight.triggered.connect(lambda : Navigations.scroll_right(self))
-        self.actionZoom_out.triggered.connect(lambda : Navigations.Zoom_out(self))
-        self.actionLeft.triggered.connect(lambda : Navigations.scroll_left(self))
-        self.actionSlower.triggered.connect(lambda : Navigations.SpeedDown(self))
-        self.actionZoom_in.triggered.connect(lambda : Navigations.Zoom_in(self))
         self.actionFaster.triggered.connect(lambda : Navigations.SpeedUp(self))
+        self.actionSlower.triggered.connect(lambda : Navigations.SpeedDown(self))
+        self.actionZoom_out.triggered.connect(lambda : Navigations.Zoom(self,0))
+        self.actionZoom_in.triggered.connect(lambda : Navigations.Zoom(self,1))
+        self.actionRight.triggered.connect(lambda : Navigations.Scroll(self,1))
+        self.actionLeft.triggered.connect(lambda : Navigations.Scroll(self,0))
         self.SpectroSlider[0].valueChanged.connect(self.minchange)
         self.SpectroSlider[1].valueChanged.connect(self.maxchange)
         self.actionWhite.triggered.connect(self.White_background)
@@ -355,7 +355,7 @@ class Ui_MainWindow(object):
         self.actionEqualizer.triggered.connect(
             lambda: Navigations.ShowEqualizer(self, MainWindow))
         self.actionSave.triggered.connect(self.saveFile)
-        for x in range(3):
+        for x in range(5):
             self.actiontheme[x].triggered.connect(lambda checked, x=x: self.theme(x))
 
         for i in range(10):
@@ -375,7 +375,6 @@ class Ui_MainWindow(object):
         self.Spectrogram_After.setBackground('#000')
     
     def theme (self,i):
-        print(i)
         if i ==0:
             self.Pallete0 = [75, 0, 115, 255]
             self.Pallete0_5 = [0, 180, 190, 255]
@@ -388,6 +387,15 @@ class Ui_MainWindow(object):
             self.Pallete0 = [0, 180, 190, 255]
             self.Pallete0_5 = [245, 110, 0, 255]
             self.Pallete1 = [75, 0, 115, 255]
+        elif i == 3:
+            self.Pallete0 = [140, 80, 90, 255]
+            self.Pallete0_5 = [245, 50, 70, 255]
+            self.Pallete1 = [75, 0, 115, 255]
+        elif i == 4:
+            self.Pallete0 = [0, 180, 190, 255]
+            self.Pallete0_5 = [75, 0, 115, 255]
+            self.Pallete1 = [245, 110, 0, 255]
+
 
         yt = self.fft(self.signalData)
         self.Spectrogram(self.signalData)
@@ -457,11 +465,16 @@ class Ui_MainWindow(object):
 
     def fft(self,data):
         self.No_samples = self.samplingfrequency * int(self.duration)
+        # print(self.No_samples)
         self.yrfft = rfft(np.real(data))
-        self.xrfft = rfftfreq(int(self.No_samples), 1.0 / self.samplingfrequency)
-        self.BW = int(len(self.yrfft)/10)
+        self.xrfft = rfftfreq(self.No_samples, 1 / self.samplingfrequency)
+        self.BW = int(len(self.xrfft)/10)
+        # print(len(self.xrfft))
         for i in range (10):
             self.yrfft[i*self.BW : (i+1)*self.BW]*=self.Slider[i].value()
+        self.yrfft[-1] =self.Slider[9].value()
+        # plt.plot(self.xrfft, np.abs(self.yrfft))
+        # plt.show()
         yt = irfft(self.yrfft)
         return np.real(yt) 
 
