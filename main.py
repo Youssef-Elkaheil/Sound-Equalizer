@@ -323,7 +323,7 @@ class Ui_MainWindow(object):
         self.Pallete1 = [245, 110, 0, 255]
         self.step = 0.02
         self.timer = QtCore.QTimer()
-        self.timer.timeout.connect(lambda: Navigations.Update(self))
+        self.timer.timeout.connect(lambda: Navigations.Play(self))
         self.speed = 500
         self.timer.setInterval(self.speed)
         self.timer.start()

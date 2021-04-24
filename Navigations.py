@@ -1,3 +1,6 @@
+def Update_range(self,x0,x1):
+    self.Graph_After.setXRange(x0, x1, padding=0)
+    self.Graph_Before.setXRange(x0, x1, padding=0)
 
 def Zoom(self,flag):
     xrange, yrange = self.Graph_After.viewRange()
@@ -6,11 +9,9 @@ def Zoom(self,flag):
     elif flag ==0:     #Zoom out
         x = [ i*2 for i in xrange]
     if xrange[1]*2 <= self.duration+1 or flag ==1:
-        self.Graph_After.setXRange(x[0], x[1], padding=0)
-        self.Graph_Before.setXRange(x[0], x[1], padding=0)
+        Update_range(self,x[0],x[1])
     else:
-        self.Graph_After.setXRange(0, self.duration, padding=0)
-        self.Graph_Before.setXRange(0, self.duration, padding=0)
+        Update_range(self,0,self.duration)
 
 def Scroll (self,flag):
     xrange, yrange = self.Graph_After.viewRange()
@@ -19,14 +20,12 @@ def Scroll (self,flag):
     elif flag == 0:  # scroll left
         x = [i-self.step for i in xrange]
     if x[0]>0 and x[1]<self.duration:
-        self.Graph_After.setXRange(x[0], x[1], padding=0)
-        self.Graph_Before.setXRange(x[0], x[1], padding=0)
+        Update_range(self, x[0], x[1])
     else:
         self.timer.stop()
         self.actionPlay.setChecked(False)
         
-def Update(self):
-    xrange, yrange = self.Graph_After.viewRange()
+def Play(self):
     if self.actionPlay.isChecked():
         Scroll(self,1)
 
