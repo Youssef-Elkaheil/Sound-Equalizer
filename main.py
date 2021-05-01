@@ -17,7 +17,8 @@ import Resources
 import wave
 import sys
 import os
-from matplotlib import pyplot as plt
+# from matplotlib import pyplot as plt
+
 class ApplicationWindow(QtWidgets.QMainWindow):
     def __init__(self):
         super(ApplicationWindow, self).__init__()
@@ -117,7 +118,7 @@ class Ui_MainWindow(object):
             self.Slider[i].setTickPosition(
                 QtWidgets.QSlider.TicksBothSides)
             self.Slider[i].setTickInterval(1)
-            self.Slider[i].setObjectName("Slider_{}".format(i+1))
+            self.Slider[i].setObjectName("Slider_{n}".format(n=i+1))
             self.horizontalLayout.addWidget(self.Slider[i])
         self.SpectroSlider =[]
         for i in range(2):
@@ -392,7 +393,7 @@ class Ui_MainWindow(object):
             self.Pallete0_5 = [245, 50, 70, 255]
             self.Pallete1 = [75, 0, 115, 255]
         elif i == 4:
-            self.Pallete0 = [0, 180, 190, 255]
+            self.Pallete0 = [0, 140, 180, 255]
             self.Pallete0_5 = [75, 0, 115, 255]
             self.Pallete1 = [245, 110, 0, 255]
 
@@ -424,8 +425,6 @@ class Ui_MainWindow(object):
             self.SpectroSlider[0].setSliderPosition(
                 self.SpectroSlider[1].value()-1)
             
-       
-    
     def getFile(self):
         if self.open ==0:
             self.filePath = QFileDialog.getOpenFileName(filter="wav (*.wav)")[0]
@@ -483,20 +482,20 @@ class Ui_MainWindow(object):
         pg.setConfigOptions(imageAxisOrder='row-major')
         freq, time, Spectrodata = signal.spectrogram(
             data, self.samplingfrequency)
-        img_After = pg.ImageItem()
-        self.Spectrogram_Before.addItem(img_After)
-        hist_After = pg.HistogramLUTItem()
-        hist_After.setImageItem(img_After)
-        hist_After.setLevels(min=np.min(Spectrodata), max=np.max(Spectrodata))
-        hist_After.gradient.restoreState(
+        img_Before = pg.ImageItem()
+        self.Spectrogram_Before.addItem(img_Before)
+        hist_Before = pg.HistogramLUTItem()
+        hist_Before.setImageItem(img_Before)
+        hist_Before.setLevels(min=np.min(Spectrodata), max=np.max(Spectrodata))
+        hist_Before.gradient.restoreState(
             {'mode': 'rgb',
                 'ticks':[(self.maxvalue, self.Pallete1), 
                         (self.middlevalue, self.Pallete0_5),
                         (self.minvalue, self.Pallete0)]})
-        img_After.setImage(Spectrodata)
-        img_After.scale(time[-1]/np.size(Spectrodata, axis=1),
+        img_Before.setImage(Spectrodata)
+        img_Before.scale(time[-1]/np.size(Spectrodata, axis=1),
                         freq[-1]/np.size(Spectrodata, axis=0))
-        self.Spectrogram_Before.addItem(img_After)
+        self.Spectrogram_Before.addItem(img_Before)
         self.Spectrogram_Before.setLimits(
             xMin=time[0], xMax=time[-1],
              yMin=freq[0], yMax=freq[-1])
